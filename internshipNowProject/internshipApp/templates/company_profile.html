@@ -1,0 +1,9 @@
+<h2>Company Profile</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+<a href="/logout/">Logout</a>
