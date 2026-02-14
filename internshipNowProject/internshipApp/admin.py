@@ -1,6 +1,3 @@
-#from django.contrib import admin
-#from .models import internshipApp
-
 from django.contrib import admin
 from .models import User, StudentProfile, CompanyProfile
 
