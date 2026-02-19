@@ -72,7 +72,7 @@ def custom_login(request):
         if user is not None:
             login(request, user)
 
-            # 🔥 Redirección según rol
+        
             if user.role == 'student':
                 return redirect('student_profile')
             elif user.role == 'company':
