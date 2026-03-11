@@ -14,6 +14,7 @@ class StudentProfile(models.Model):
     career = models.CharField(max_length=255)
     skills = models.TextField()
     bio = models.TextField(blank=True)
+    cv_pdf = models.FileField(upload_to='cvs/', blank=True, null=True)  # US-10: upload CV
 
 
 class CompanyProfile(models.Model):
