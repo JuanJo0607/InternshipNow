@@ -77,11 +77,8 @@ def custom_login(request):
             elif user.role == 'company':
                 return redirect('company_profile')
 
-<<<<<<< feature/US-05-verification
     return render(request, 'registration/login.html')
-=======
     # GET o fallo
-    return render(request, 'registration/login.html')
 
 
 # US-10: Vista para subir/reemplazar CV en PDF
@@ -101,4 +98,3 @@ def upload_cv(request):
         form = StudentCVForm(instance=profile)
 
     return render(request, 'upload_cv.html', {'form': form, 'profile': profile})
->>>>>>> development
