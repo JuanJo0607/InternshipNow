@@ -14,6 +14,12 @@ class StudentProfile(models.Model):
     career = models.CharField(max_length=255)
     skills = models.TextField()
     bio = models.TextField(blank=True)
+    is_verified = models.BooleanField(default=False)  # <-- línea nueva
+
+    def __str__(self):
+        if self.is_verified:
+            return f"{self.user.username} - Estudiante Verificado"
+        return f"{self.user.username} - Pendiente de verificación"
 
 
 class CompanyProfile(models.Model):
