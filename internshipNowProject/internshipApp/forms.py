@@ -31,5 +31,6 @@ class InternshipOfferForm(forms.ModelForm):
             'desired_skills',
             'location',
             'salary',
+            'modality',
             'status',
         ]

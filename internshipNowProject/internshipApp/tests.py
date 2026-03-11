@@ -19,6 +19,7 @@ class InternshipOfferTests(TestCase):
             'desired_skills': 'Skills',
             'location': 'City',
             'salary': '1000.00',
+            'modality': 'presencial',
             'status': 'open',
         })
         self.assertEqual(response.status_code, 302)
@@ -33,6 +34,7 @@ class InternshipOfferTests(TestCase):
             desired_skills='Skills',
             location='City',
             salary='1500.00',
+            modality='virtual',
             status='open'
         )
         response = self.client.get(reverse('company_offers'))
