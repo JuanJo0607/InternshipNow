@@ -27,6 +27,10 @@
         </button>
     </form>
 
+    <div class="mt-6">
+        <a href="{% url 'student_offers' %}" class="text-blue-500 hover:underline">View all internship offers</a>
+    </div>
+
     <!-- LOGOUT -->
     <form action="{% url 'logout' %}" method="POST" class="mt-4">
         {% csrf_token %}

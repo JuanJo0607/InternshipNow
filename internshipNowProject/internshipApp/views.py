@@ -1,8 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm
-from .models import StudentProfile, CompanyProfile
+from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm
+from .models import StudentProfile, CompanyProfile, InternshipOffer
 from django.contrib.auth import authenticate, login
+
+
+@login_required
+def student_offers(request):
+    # list all open offers for students
+    offers = InternshipOffer.objects.filter(status='open').order_by('-created_at')
+    return render(request, 'student_offers.html', {'offers': offers})
 
 
 def register(request):
@@ -79,3 +86,58 @@ def custom_login(request):
 
     # GET o fallo
     return render(request, 'registration/login.html')
+
+
+# ----- Internship offer management -----
+
+@login_required
+def company_offers(request):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    offers = profile.offers.all().order_by('-created_at')
+    return render(request, 'company_offers.html', {'offers': offers})
+
+
+@login_required
+def create_offer(request):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    if request.method == 'POST':
+        form = InternshipOfferForm(request.POST)
+        if form.is_valid():
+            offer = form.save(commit=False)
+            offer.company = profile
+            offer.save()
+            return redirect('company_offers')
+    else:
+        form = InternshipOfferForm()
+    return render(request, 'internship_form.html', {'form': form, 'action': 'Create'})
+
+
+@login_required
+def edit_offer(request, offer_id):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    offer = InternshipOffer.objects.get(id=offer_id, company=profile)
+    if request.method == 'POST':
+        form = InternshipOfferForm(request.POST, instance=offer)
+        if form.is_valid():
+            form.save()
+            return redirect('company_offers')
+    else:
+        form = InternshipOfferForm(instance=offer)
+    return render(request, 'internship_form.html', {'form': form, 'action': 'Edit'})
+
+
+@login_required
+def close_offer(request, offer_id):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    offer = InternshipOffer.objects.get(id=offer_id, company=profile)
+    offer.status = 'closed'
+    offer.save()
+    return redirect('company_offers')
