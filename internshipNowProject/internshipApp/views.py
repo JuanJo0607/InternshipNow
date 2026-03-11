@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm
+from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, StudentCVForm
 from .models import StudentProfile, CompanyProfile
 from django.contrib.auth import authenticate, login
 
@@ -39,7 +39,7 @@ def student_profile(request):
     else:
         form = StudentProfileForm(instance=profile)
 
-    return render(request, 'student_profile.html', {'form': form})
+    return render(request, 'student_profile.html', {'form': form, 'profile': profile})
 
 
 @login_required
@@ -62,6 +62,7 @@ def company_profile(request):
 def home(request):
     return render(request, 'home.html')
 
+
 def custom_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -79,3 +80,22 @@ def custom_login(request):
 
     # GET o fallo
     return render(request, 'registration/login.html')
+
+
+# US-10: Vista para subir/reemplazar CV en PDF
+@login_required
+def upload_cv(request):
+    if request.user.role != 'student':
+        return redirect('home')
+
+    profile = StudentProfile.objects.get(user=request.user)
+
+    if request.method == 'POST':
+        form = StudentCVForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('student_profile')
+    else:
+        form = StudentCVForm(instance=profile)
+
+    return render(request, 'upload_cv.html', {'form': form, 'profile': profile})
