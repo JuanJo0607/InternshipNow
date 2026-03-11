@@ -1,33 +1,35 @@
 {% extends 'base.html' %}
-
 {% block title %}Student Profile{% endblock %}
-
 {% block content %}
 <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
-
     <h2 class="text-2xl font-bold mb-6">Student Profile</h2>
 
-    <!-- FORM SAVE -->
+    {% if profile.is_verified %}
+        <span class="inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full mb-4">
+             Estudiante Verificado
+        </span>
+    {% else %}
+        <span class="inline-block bg-yellow-100 text-yellow-800 text-sm font-semibold px-3 py-1 rounded-full mb-4">
+            ⏳ Pendiente de verificación
+        </span>
+    {% endif %}
+
     <form method="post" class="space-y-4">
         {% csrf_token %}
-
         {% for field in form %}
             <div class="flex flex-col">
                 <label class="mb-1 font-semibold text-gray-700">
                     {{ field.label }}
                 </label>
-
                 {{ field }}
             </div>
         {% endfor %}
-
         <button type="submit"
             class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Save
         </button>
     </form>
 
-    <!-- LOGOUT -->
     <form action="{% url 'logout' %}" method="POST" class="mt-4">
         {% csrf_token %}
         <button type="submit"
@@ -35,6 +37,5 @@
             Logout
         </button>
     </form>
-
 </div>
 {% endblock %}
