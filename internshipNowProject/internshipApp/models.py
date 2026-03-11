@@ -14,7 +14,16 @@ class StudentProfile(models.Model):
     career = models.CharField(max_length=255)
     skills = models.TextField()
     bio = models.TextField(blank=True)
+<<<<<<< feature/US-05-verification
+    is_verified = models.BooleanField(default=False)  # <-- línea nueva
+
+    def __str__(self):
+        if self.is_verified:
+            return f"{self.user.username} - Estudiante Verificado"
+        return f"{self.user.username} - Pendiente de verificación"
+=======
     cv_pdf = models.FileField(upload_to='cvs/', blank=True, null=True)  # US-10: upload CV
+>>>>>>> development
 
 
 class CompanyProfile(models.Model):

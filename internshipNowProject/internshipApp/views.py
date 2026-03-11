@@ -12,7 +12,6 @@ def register(request):
             user = form.save()
             login(request, user)
 
-            # Crear perfil automáticamente
             if user.role == 'student':
                 StudentProfile.objects.create(user=user)
                 return redirect('student_profile')
@@ -78,6 +77,9 @@ def custom_login(request):
             elif user.role == 'company':
                 return redirect('company_profile')
 
+<<<<<<< feature/US-05-verification
+    return render(request, 'registration/login.html')
+=======
     # GET o fallo
     return render(request, 'registration/login.html')
 
@@ -99,3 +101,4 @@ def upload_cv(request):
         form = StudentCVForm(instance=profile)
 
     return render(request, 'upload_cv.html', {'form': form, 'profile': profile})
+>>>>>>> development
