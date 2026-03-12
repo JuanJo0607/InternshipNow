@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm
 from .models import StudentProfile, CompanyProfile, InternshipOffer
+from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, StudentCVForm
+from .models import StudentProfile, CompanyProfile
 from django.contrib.auth import authenticate, login
 
 
@@ -19,7 +21,6 @@ def register(request):
             user = form.save()
             login(request, user)
 
-            # Crear perfil automáticamente
             if user.role == 'student':
                 StudentProfile.objects.create(user=user)
                 return redirect('student_profile')
@@ -46,7 +47,7 @@ def student_profile(request):
     else:
         form = StudentProfileForm(instance=profile)
 
-    return render(request, 'student_profile.html', {'form': form})
+    return render(request, 'student_profile.html', {'form': form, 'profile': profile})
 
 
 @login_required
@@ -69,6 +70,7 @@ def company_profile(request):
 def home(request):
     return render(request, 'home.html')
 
+
 def custom_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -84,7 +86,6 @@ def custom_login(request):
             elif user.role == 'company':
                 return redirect('company_profile')
 
-    # GET o fallo
     return render(request, 'registration/login.html')
 
 
@@ -141,3 +142,23 @@ def close_offer(request, offer_id):
     offer.status = 'closed'
     offer.save()
     return redirect('company_offers')
+    # GET o fallo
+
+
+# US-10: Vista para subir/reemplazar CV en PDF
+@login_required
+def upload_cv(request):
+    if request.user.role != 'student':
+        return redirect('home')
+
+    profile = StudentProfile.objects.get(user=request.user)
+
+    if request.method == 'POST':
+        form = StudentCVForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('student_profile')
+    else:
+        form = StudentCVForm(instance=profile)
+
+    return render(request, 'upload_cv.html', {'form': form, 'profile': profile})

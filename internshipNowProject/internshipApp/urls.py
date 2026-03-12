@@ -17,3 +17,5 @@ urlpatterns = [
 ]
 
 
+    path('student/upload-cv/', views.upload_cv, name='upload_cv'),  # US-10
+]
