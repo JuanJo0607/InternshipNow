@@ -6,7 +6,10 @@
 <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-bold">Available Internship Offers</h2>
-        <a href="{% url 'student_profile' %}" class="text-blue-500 hover:underline">← Back to Profile</a>
+        <div class="space-x-4">
+            <a href="{% url 'student_applications' %}" class="text-green-500 hover:underline">View My Applications</a>
+            <a href="{% url 'student_profile' %}" class="text-blue-500 hover:underline">← Back to Profile</a>
+        </div>
     </div>
     {% if offers %}
     <ul class="space-y-4">
@@ -15,6 +18,13 @@
                 <h3 class="text-xl font-semibold">{{ offer.title }}</h3>
                 <p class="text-gray-700">{{ offer.company.company_name }}</p>
                 <p class="mt-2">{{ offer.description|truncatechars:150 }}</p>
+                <div class="mt-3">
+                    {% if offer.id in applied_ids %}
+                        <span class="text-gray-500">Applied</span>
+                    {% else %}
+                        <a href="{% url 'apply_to_offer' offer.id %}" class="text-blue-500 hover:underline">Apply</a>
+                    {% endif %}
+                </div>
             </li>
         {% endfor %}
     </ul>

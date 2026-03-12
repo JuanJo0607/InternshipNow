@@ -1,9 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm
-from .models import StudentProfile, CompanyProfile, InternshipOffer
-from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, StudentCVForm
-from .models import StudentProfile, CompanyProfile
+from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm, StudentCVForm, ApplicationStatusForm
+from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
 from django.contrib.auth import authenticate, login
 
 
@@ -11,7 +9,11 @@ from django.contrib.auth import authenticate, login
 def student_offers(request):
     # list all open offers for students
     offers = InternshipOffer.objects.filter(status='open').order_by('-created_at')
-    return render(request, 'student_offers.html', {'offers': offers})
+    applied_ids = []
+    if request.user.role == 'student':
+        profile = StudentProfile.objects.get(user=request.user)
+        applied_ids = list(profile.applications.values_list('offer_id', flat=True))
+    return render(request, 'student_offers.html', {'offers': offers, 'applied_ids': applied_ids})
 
 
 def register(request):
@@ -143,6 +145,56 @@ def close_offer(request, offer_id):
     offer.save()
     return redirect('company_offers')
     # GET o fallo
+
+
+# application views
+
+@login_required
+def apply_to_offer(request, offer_id):
+    if request.user.role != 'student':
+        return redirect('home')
+    profile = StudentProfile.objects.get(user=request.user)
+    offer = InternshipOffer.objects.get(id=offer_id, status='open')
+    # ensure single application per student/offer
+    InternshipApplication.objects.get_or_create(student=profile, offer=offer)
+    return redirect('student_applications')
+
+
+@login_required
+def student_applications(request):
+    if request.user.role != 'student':
+        return redirect('home')
+    profile = StudentProfile.objects.get(user=request.user)
+    applications = profile.applications.select_related('offer__company').order_by('-applied_at')
+    return render(request, 'student_applications.html', {'applications': applications})
+
+
+@login_required
+def company_applications(request):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    applications = InternshipApplication.objects.filter(offer__company=profile).order_by('-applied_at')
+    return render(request, 'company_applications.html', {'applications': applications})
+
+
+@login_required
+def update_application_status(request, application_id):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    application = InternshipApplication.objects.get(id=application_id, offer__company=profile)
+    if application.status != 'pending':
+        # already decided, nothing to do
+        return redirect('company_applications')
+    if request.method == 'POST':
+        form = ApplicationStatusForm(request.POST, instance=application)
+        if form.is_valid():
+            form.save()
+            return redirect('company_applications')
+    else:
+        form = ApplicationStatusForm(instance=application)
+    return render(request, 'application_status_form.html', {'form': form, 'application': application})
 
 
 # US-10: Vista para subir/reemplazar CV en PDF
