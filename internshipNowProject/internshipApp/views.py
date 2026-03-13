@@ -9,10 +9,34 @@ from django.contrib.auth import authenticate, login
 
 @login_required
 def student_offers(request):
-    # list all open offers for students
     offers = InternshipOffer.objects.filter(status='open').order_by('-created_at')
-    return render(request, 'student_offers.html', {'offers': offers})
 
+    location = request.GET.get('location', '').strip()
+    salary = request.GET.get('salary', '').strip()
+    modality = request.GET.get('modality', '').strip()
+    skill = request.GET.get('skill', '').strip()
+
+    if location:
+        offers = offers.filter(location__icontains=location)
+
+    if salary:
+        offers = offers.filter(salary__gte=salary)
+
+    if modality:
+        offers = offers.filter(modality=modality)
+
+    if skill:
+        offers = offers.filter(desired_skills__icontains=skill)
+
+    return render(request, 'student_offers.html', {
+        'offers': offers,
+        'filters': {
+            'location': location,
+            'salary': salary,
+            'modality': modality,
+            'skill': skill,
+        }
+    })
 
 def register(request):
     if request.method == 'POST':
