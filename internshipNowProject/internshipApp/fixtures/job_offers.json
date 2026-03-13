@@ -1,0 +1,50 @@
+[
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 1,
+    "fields": {
+      "company": 3,
+      "title": "Backend Developer Intern",
+      "description": "Join our team to build scalable APIs and microservices for our analytics platform. Work with Python, Django, and PostgreSQL.",
+      "requirements": "Knowledge of Python and Django. Familiarity with RESTful APIs and relational databases.",
+      "desired_skills": "Docker, AWS, Git, Unit Testing",
+      "location": "Remote",
+      "salary": "1200.00",
+      "modality": "virtual",
+      "status": "open",
+      "created_at": "2026-03-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 2,
+    "fields": {
+      "company": 3,
+      "title": "Frontend Developer Intern",
+      "description": "Work on modern UI components for our SaaS dashboard using React.js and TypeScript.",
+      "requirements": "Experience with JavaScript, React.js, and CSS frameworks.",
+      "desired_skills": "TypeScript, Figma, Responsive Design",
+      "location": "Remote",
+      "salary": "1100.00",
+      "modality": "virtual",
+      "status": "open",
+      "created_at": "2026-03-02T11:00:00Z"
+    }
+  },
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 3,
+    "fields": {
+      "company": 3,
+      "title": "Data Science Intern",
+      "description": "Assist in building machine learning models for predictive analytics. Work closely with our data engineering team.",
+      "requirements": "Strong foundation in statistics and Python. Experience with pandas and scikit-learn.",
+      "desired_skills": "TensorFlow, Data Visualization, SQL",
+      "location": "Remote",
+      "salary": "1300.00",
+      "modality": "virtual",
+      "status": "open",
+      "created_at": "2026-03-03T12:00:00Z"
+    }
+  }
+]
