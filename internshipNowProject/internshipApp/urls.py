@@ -15,4 +15,5 @@ urlpatterns = [
     path('company/offers/<int:offer_id>/edit/', views.edit_offer, name='edit_offer'),
     path('company/offers/<int:offer_id>/close/', views.close_offer, name='close_offer'),
     path('student/upload-cv/', views.upload_cv, name='upload_cv'),  # US-10
+    path('student/matching/', views.matching_offers, name='matching_offers'), #US-11
 ]
