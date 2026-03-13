@@ -5,56 +5,55 @@ from .models import StudentProfile, CompanyProfile, InternshipOffer
 from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, StudentCVForm
 from .models import StudentProfile, CompanyProfile
 from django.contrib.auth import authenticate, login
+from .matching import annotate_offers_with_score
+
 
 
 @login_required
 def student_offers(request):
+    """
+    FR-07 + FR-11: Lista de ofertas abiertas con filtros y score de compatibilidad.
+    Las ofertas se ordenan de mayor a menor score cuando el estudiante tiene
+    habilidades registradas en su perfil.
+    """
+    if request.user.role != 'student':
+        return redirect('home')
+
     offers = InternshipOffer.objects.filter(status='open').order_by('-created_at')
 
     location = request.GET.get('location', '').strip()
-    salary = request.GET.get('salary', '').strip()
+    salary   = request.GET.get('salary', '').strip()
     modality = request.GET.get('modality', '').strip()
-    skill = request.GET.get('skill', '').strip()
+    skill    = request.GET.get('skill', '').strip()
 
     if location:
         offers = offers.filter(location__icontains=location)
-
     if salary:
         offers = offers.filter(salary__gte=salary)
-
     if modality:
         offers = offers.filter(modality=modality)
-
     if skill:
         offers = offers.filter(desired_skills__icontains=skill)
 
+    # FR-11 – calcular score de compatibilidad
+    try:
+        profile = StudentProfile.objects.get(user=request.user)
+        student_skills = profile.skills
+    except StudentProfile.DoesNotExist:
+        student_skills = ''
+
+    ranked_offers = annotate_offers_with_score(offers, student_skills)
+
     return render(request, 'student_offers.html', {
-        'offers': offers,
+        'ranked_offers': ranked_offers,
+        'student_skills': student_skills,
         'filters': {
             'location': location,
-            'salary': salary,
+            'salary':   salary,
             'modality': modality,
-            'skill': skill,
-        }
+            'skill':    skill,
+        },
     })
-
-def register(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-
-            if user.role == 'student':
-                StudentProfile.objects.create(user=user)
-                return redirect('student_profile')
-            elif user.role == 'company':
-                CompanyProfile.objects.create(user=user)
-                return redirect('company_profile')
-    else:
-        form = CustomUserCreationForm()
-
-    return render(request, 'register.html', {'form': form})
 
 
 @login_required
@@ -94,6 +93,24 @@ def company_profile(request):
 def home(request):
     return render(request, 'home.html')
 
+
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+
+            if user.role == 'student':
+                StudentProfile.objects.create(user=user)
+                return redirect('student_profile')
+            elif user.role == 'company':
+                CompanyProfile.objects.create(user=user)
+                return redirect('company_profile')
+    else:
+        form = CustomUserCreationForm()
+
+    return render(request, 'register.html', {'form': form})
 
 def custom_login(request):
     if request.method == 'POST':
@@ -186,3 +203,30 @@ def upload_cv(request):
         form = StudentCVForm(instance=profile)
 
     return render(request, 'upload_cv.html', {'form': form, 'profile': profile})
+
+
+@login_required
+def matching_offers(request):
+    """
+    FR-11 - Vista dedicada: muestra SOLO las ofertas con score > 0,
+    ordenadas de mayor a menor compatibilidad. No aplica filtros adicionales.
+    """
+    if request.user.role != 'student':
+        return redirect('home')
+
+    try:
+        profile = StudentProfile.objects.get(user=request.user)
+        student_skills = profile.skills
+    except StudentProfile.DoesNotExist:
+        student_skills = ''
+
+    offers = InternshipOffer.objects.filter(status='open')
+    ranked_offers = annotate_offers_with_score(offers, student_skills)
+
+    # Filtrar solo las que tienen alguna coincidencia
+    matched = [r for r in ranked_offers if r['score'] > 0]
+
+    return render(request, 'matching_offers.html', {
+        'ranked_offers': matched,
+        'student_skills': student_skills,
+    })

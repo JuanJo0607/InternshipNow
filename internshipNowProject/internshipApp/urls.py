@@ -8,6 +8,7 @@ urlpatterns = [
     path('student/profile/', views.student_profile, name='student_profile'),
     path('student/offers/', views.student_offers, name='student_offers'),
     path('student/upload-cv/', views.upload_cv, name='upload_cv'),
+    path('student/matching/', views.matching_offers, name='matching_offers'),  # FR-11
     path('company/profile/', views.company_profile, name='company_profile'),
     path('company/offers/', views.company_offers, name='company_offers'),
     path('company/offers/new/', views.create_offer, name='create_offer'),
