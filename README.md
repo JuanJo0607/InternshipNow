@@ -6,7 +6,7 @@
 
 ```bash
 git clone https://github.com/JuanJo0607/InternshipNow.git
-cd InternshipNow
+cd InternshipNowProject
 ```
 
 ### 2. Install dependencies
