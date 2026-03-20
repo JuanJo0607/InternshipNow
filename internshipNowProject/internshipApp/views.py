@@ -1,9 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm
-from .models import StudentProfile, CompanyProfile, InternshipOffer
-from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, StudentCVForm
-from .models import StudentProfile, CompanyProfile
+from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm, StudentCVForm, ApplicationStatusForm
+from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
 from django.contrib.auth import authenticate, login
 from .matching import annotate_offers_with_score
 
@@ -44,9 +42,15 @@ def student_offers(request):
 
     ranked_offers = annotate_offers_with_score(offers, student_skills)
 
+    # US-08 – IDs de ofertas ya aplicadas
+    applied_ids = list(
+        InternshipApplication.objects.filter(student__user=request.user).values_list('offer_id', flat=True)
+    )
+
     return render(request, 'student_offers.html', {
         'ranked_offers': ranked_offers,
         'student_skills': student_skills,
+        'applied_ids': applied_ids,
         'filters': {
             'location': location,
             'salary':   salary,
@@ -111,6 +115,7 @@ def register(request):
         form = CustomUserCreationForm()
 
     return render(request, 'register.html', {'form': form})
+
 
 def custom_login(request):
     if request.method == 'POST':
@@ -183,7 +188,54 @@ def close_offer(request, offer_id):
     offer.status = 'closed'
     offer.save()
     return redirect('company_offers')
-    # GET o fallo
+
+
+# ----- Application views (US-08) -----
+
+@login_required
+def apply_to_offer(request, offer_id):
+    if request.user.role != 'student':
+        return redirect('home')
+    profile = StudentProfile.objects.get(user=request.user)
+    offer = InternshipOffer.objects.get(id=offer_id, status='open')
+    InternshipApplication.objects.get_or_create(student=profile, offer=offer)
+    return redirect('student_applications')
+
+
+@login_required
+def student_applications(request):
+    if request.user.role != 'student':
+        return redirect('home')
+    profile = StudentProfile.objects.get(user=request.user)
+    applications = profile.applications.select_related('offer__company').order_by('-applied_at')
+    return render(request, 'student_applications.html', {'applications': applications})
+
+
+@login_required
+def company_applications(request):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    applications = InternshipApplication.objects.filter(offer__company=profile).order_by('-applied_at')
+    return render(request, 'company_applications.html', {'applications': applications})
+
+
+@login_required
+def update_application_status(request, application_id):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    application = InternshipApplication.objects.get(id=application_id, offer__company=profile)
+    if application.status != 'pending':
+        return redirect('company_applications')
+    if request.method == 'POST':
+        form = ApplicationStatusForm(request.POST, instance=application)
+        if form.is_valid():
+            form.save()
+            return redirect('company_applications')
+    else:
+        form = ApplicationStatusForm(instance=application)
+    return render(request, 'application_status_form.html', {'form': form, 'application': application})
 
 
 # US-10: Vista para subir/reemplazar CV en PDF
@@ -223,7 +275,6 @@ def matching_offers(request):
     offers = InternshipOffer.objects.filter(status='open')
     ranked_offers = annotate_offers_with_score(offers, student_skills)
 
-    # Filtrar solo las que tienen alguna coincidencia
     matched = [r for r in ranked_offers if r['score'] > 0]
 
     return render(request, 'matching_offers.html', {

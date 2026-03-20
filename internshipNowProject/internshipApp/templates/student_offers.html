@@ -11,6 +11,7 @@
             <a href="{% url 'matching_offers' %}" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm">
                  Best matches for me
             </a>
+            <a href="{% url 'student_applications' %}" class="text-green-500 hover:underline">View My Applications</a>
             <a href="{% url 'student_profile' %}" class="text-blue-500 hover:underline">← Back to Profile</a>
         </div>
     </div>
@@ -94,6 +95,15 @@
                     </div>
                 </div>
                 {% endif %}
+
+                {# US-08 - Botón de aplicar #}
+                <div class="mt-3">
+                    {% if item.offer.id in applied_ids %}
+                        <span class="text-gray-500">Applied</span>
+                    {% else %}
+                        <a href="{% url 'apply_to_offer' item.offer.id %}" class="text-blue-500 hover:underline">Apply</a>
+                    {% endif %}
+                </div>
             </li>
         {% endfor %}
     </ul>

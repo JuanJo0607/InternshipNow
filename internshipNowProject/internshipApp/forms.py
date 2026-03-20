@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, StudentProfile, CompanyProfile, InternshipOffer
+from .models import User, StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -34,6 +34,26 @@ class InternshipOfferForm(forms.ModelForm):
             'modality',
             'status',
         ]
+
+
+class ApplicationStatusForm(forms.ModelForm):
+    class Meta:
+        model = InternshipApplication
+        fields = ['status']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # only allow moving from pending to accepted/rejected
+        if self.instance and self.instance.pk:
+            if self.instance.status == 'pending':
+                self.fields['status'].choices = [
+                    ('accepted', 'Accepted'),
+                    ('rejected', 'Rejected'),
+                ]
+            else:
+                # disable field if already decided
+                self.fields['status'].disabled = True
+
 # US-10: Form para subir CV en PDF
 class StudentCVForm(forms.ModelForm):
     class Meta:

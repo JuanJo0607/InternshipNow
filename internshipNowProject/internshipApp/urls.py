@@ -14,4 +14,10 @@ urlpatterns = [
     path('company/offers/new/', views.create_offer, name='create_offer'),
     path('company/offers/<int:offer_id>/edit/', views.edit_offer, name='edit_offer'),
     path('company/offers/<int:offer_id>/close/', views.close_offer, name='close_offer'),
+    # US-08 student application URLs
+    path('student/offers/<int:offer_id>/apply/', views.apply_to_offer, name='apply_to_offer'),
+    path('student/applications/', views.student_applications, name='student_applications'),
+    # US-08 company application management
+    path('company/applications/', views.company_applications, name='company_applications'),
+    path('company/applications/<int:application_id>/status/', views.update_application_status, name='update_application_status'),
 ]

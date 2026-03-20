@@ -6,9 +6,12 @@
 <div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
     <h2 class="text-2xl font-bold mb-6">My Internship Offers</h2>
 
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 space-x-4">
         <a href="{% url 'create_offer' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
             + New Offer
+        </a>
+        <a href="{% url 'company_applications' %}" class="text-blue-500 hover:underline">
+            View Applications
         </a>
         <a href="{% url 'company_profile' %}" class="text-blue-500 hover:underline">
             ← Back to Profile
