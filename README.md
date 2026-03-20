@@ -21,7 +21,7 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
-### 4. Load test data
+### 4. Load test data (Optional)
 
 ```bash
 python manage.py loaddata internshipApp/fixtures/test_users.json
