@@ -35,10 +35,168 @@
 
 <body class="bg-gray-100">
 
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <a href="{% url 'home' %}" class="text-xl font-bold text-slate-900">InternshipNow</a>
+            {% if user.is_authenticated %}
+            <div class="relative">
+                <button id="notificationButton" type="button" onclick="toggleNotifications()" class="relative p-2 text-slate-700 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
+                    </svg>
+                    {% if unread_notification_count > 0 %}
+                    <span class="absolute -top-1 -right-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white">{{ unread_notification_count }}</span>
+                    {% endif %}
+                </button>
+
+                <div id="notificationDropdown" class="hidden absolute right-0 z-50 mt-2 w-96 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                    <div class="border-b border-slate-200 px-4 py-3 bg-slate-50">
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="font-semibold text-slate-800">Notificaciones</span>
+                            <form method="post" action="{% url 'mark_all_notifications_read' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="text-sm text-blue-600 hover:text-blue-800">Marcar todas como leídas</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="max-h-72 space-y-1 overflow-y-auto px-2 py-2">
+                        {% if notifications %}
+                            {% for notification in notifications %}
+                                <div class="rounded-xl px-4 py-3 {% if not notification.is_read %}bg-blue-50{% else %}bg-white{% endif %}">
+                                    <p class="font-semibold text-slate-900">{{ notification.title }}</p>
+                                    <p class="mt-1 text-sm text-slate-600">{{ notification.message }}</p>
+                                    <p class="mt-2 text-xs text-slate-500">{{ notification.created_at|date:"d M Y H:i" }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="rounded-xl px-4 py-6 text-center text-sm text-slate-500">
+                                No hay notificaciones recientes.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
     <div class="container mx-auto mt-10">
         {% block content %}
         {% endblock %}
     </div>
+
+    <script>
+        let notificationSocket = null;
+        
+        function initWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const wsUrl = protocol + '://' + window.location.host + '/ws/notifications/';
+            
+            notificationSocket = new WebSocket(wsUrl);
+            
+            notificationSocket.onopen = function(e) {
+                console.log('WebSocket connection established');
+            };
+            
+            notificationSocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                
+                if (data.type === 'initial_count') {
+                    updateBadge(data.unread_count);
+                } else if (data.type === 'new_notification') {
+                    addNotificationToUI(data);
+                    updateBadge(data.unread_count);
+                    showBrowserNotification(data.title, data.message);
+                }
+            };
+            
+            notificationSocket.onclose = function(e) {
+                console.log('WebSocket connection closed, attempting to reconnect...');
+                setTimeout(initWebSocket, 3000);
+            };
+            
+            notificationSocket.onerror = function(e) {
+                console.error('WebSocket error:', e);
+            };
+        }
+        
+        function updateBadge(count) {
+            const badgeElement = document.querySelector('#notificationButton span');
+            if (count > 0) {
+                if (!badgeElement) {
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'absolute -top-1 -right-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white';
+                    newBadge.textContent = count;
+                    document.getElementById('notificationButton').appendChild(newBadge);
+                } else {
+                    badgeElement.textContent = count;
+                }
+            } else if (badgeElement) {
+                badgeElement.remove();
+            }
+        }
+        
+        function addNotificationToUI(notification) {
+            const container = document.querySelector('#notificationDropdown .max-h-72');
+            const emptyMessage = container.querySelector('.text-center');
+            
+            if (emptyMessage) {
+                emptyMessage.remove();
+            }
+            
+            const notifElement = document.createElement('div');
+            notifElement.className = 'rounded-xl px-4 py-3 bg-blue-50';
+            notifElement.innerHTML = `
+                <p class="font-semibold text-slate-900">${notification.title}</p>
+                <p class="mt-1 text-sm text-slate-600">${notification.message}</p>
+                <p class="mt-2 text-xs text-slate-500">${new Date(notification.created_at).toLocaleString()}</p>
+            `;
+            
+            container.insertBefore(notifElement, container.firstChild);
+            
+            const notifs = container.querySelectorAll('.rounded-xl');
+            if (notifs.length > 5) {
+                notifs[notifs.length - 1].remove();
+            }
+        }
+        
+        function showBrowserNotification(title, message) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, {
+                    body: message,
+                    icon: '/static/icon.png'
+                });
+            }
+        }
+        
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            if (dropdown) dropdown.classList.toggle('hidden');
+        }
+
+        window.addEventListener('click', function(event) {
+            const button = document.getElementById('notificationButton');
+            const dropdown = document.getElementById('notificationDropdown');
+            if (!button || !dropdown) return;
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+        
+        // Request browser notification permission
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+        
+        // Initialize WebSocket when page loads
+        {% if user.is_authenticated %}
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initWebSocket);
+        } else {
+            initWebSocket();
+        }
+        {% endif %}
+    </script>
 
 </body>
 </html>
