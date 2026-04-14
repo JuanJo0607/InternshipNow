@@ -20,4 +20,6 @@ urlpatterns = [
     # US-08 company application management
     path('company/applications/', views.company_applications, name='company_applications'),
     path('company/applications/<int:application_id>/status/', views.update_application_status, name='update_application_status'),
+    # US-14: Profile status API
+    path('api/profile-status/', views.profile_status, name='profile_status'),
 ]

@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm, StudentCVForm, ApplicationStatusForm
 from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
 from django.contrib.auth import authenticate, login
 from .matching import annotate_offers_with_score
+from .services import is_profile_complete
 
 
 
@@ -126,6 +129,13 @@ def custom_login(request):
 
         if user is not None:
             login(request, user)
+
+            # US-14: Check profile completeness for students
+            if user.role == 'student':
+                profile_status = is_profile_complete(user)
+                if not profile_status['complete']:
+                    missing = ', '.join(profile_status['missing_fields'])
+                    messages.warning(request, f"Your profile is incomplete. Missing: {missing}. Please complete it to improve your opportunities.")
 
             if user.role == 'student':
                 return redirect('student_profile')
@@ -281,3 +291,13 @@ def matching_offers(request):
         'ranked_offers': matched,
         'student_skills': student_skills,
     })
+
+
+# US-14: API endpoint for profile completeness status
+@login_required
+def profile_status(request):
+    """
+    Returns JSON with profile completeness status.
+    """
+    status = is_profile_complete(request.user)
+    return JsonResponse(status)
