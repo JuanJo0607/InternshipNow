@@ -14,6 +14,9 @@ urlpatterns = [
     path('company/offers/new/', views.create_offer, name='create_offer'),
     path('company/offers/<int:offer_id>/edit/', views.edit_offer, name='edit_offer'),
     path('company/offers/<int:offer_id>/close/', views.close_offer, name='close_offer'),
+    path('companies/<int:id>/metrics/', views.company_metrics_api, name='company_metrics_api'),
+    path('company/<int:company_id>/metrics/dashboard/', views.company_metrics_page, name='company_metrics_page'),
+    path('student/offers/<int:offer_id>/', views.offer_detail, name='offer_detail'),
     # US-08 student application URLs
     path('student/offers/<int:offer_id>/apply/', views.apply_to_offer, name='apply_to_offer'),
     path('student/applications/', views.student_applications, name='student_applications'),

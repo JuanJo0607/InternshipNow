@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block title %}Company Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-bold">Analytics Dashboard</h1>
+            <p class="text-gray-600 mt-1">Insights for {{ company.company_name }}.</p>
+        </div>
+        <div class="flex gap-3 flex-wrap">
+            <a href="{% url 'company_offers' %}" class="bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200">Back to Offers</a>
+            <a href="{% url 'company_profile' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Company Profile</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-slate-50 p-4 rounded-xl shadow-sm">
+            <label class="block text-sm font-semibold text-gray-700 mb-2" for="monthSelect">Month</label>
+            <select id="monthSelect" class="w-full border border-gray-300 rounded px-3 py-2">
+                <option value="">All months</option>
+                <option value="1">Jan</option>
+                <option value="2">Feb</option>
+                <option value="3">Mar</option>
+                <option value="4">Apr</option>
+                <option value="5">May</option>
+                <option value="6">Jun</option>
+                <option value="7">Jul</option>
+                <option value="8">Aug</option>
+                <option value="9">Sep</option>
+                <option value="10">Oct</option>
+                <option value="11">Nov</option>
+                <option value="12">Dec</option>
+            </select>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-xl shadow-sm">
+            <label class="block text-sm font-semibold text-gray-700 mb-2" for="yearSelect">Year</label>
+            <select id="yearSelect" class="w-full border border-gray-300 rounded px-3 py-2">
+                <option value="">All years</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+            </select>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-xl shadow-sm flex flex-col justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-wide text-gray-500">Current filter</p>
+                <p class="mt-3 text-lg font-semibold" id="filterLabel">All time</p>
+            </div>
+            <button id="refreshButton" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Refresh</button>
+        </div>
+    </div>
+
+    <div id="loadingState" class="rounded-xl bg-blue-50 border border-blue-100 p-6 text-center text-blue-700">Loading analytics...</div>
+    <div id="emptyState" class="hidden rounded-xl bg-yellow-50 border border-yellow-200 p-6 text-center text-yellow-800">
+        No metrics available for the selected period.
+    </div>
+
+    <div id="dashboardContent" class="hidden space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
+                <p class="text-sm text-gray-500">Total Views</p>
+                <p id="summaryTotalViews" class="text-3xl font-bold mt-3">0</p>
+            </div>
+            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
+                <p class="text-sm text-gray-500">Total Applications</p>
+                <p id="summaryTotalApplications" class="text-3xl font-bold mt-3">0</p>
+            </div>
+            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
+                <p class="text-sm text-gray-500">Avg. Days to Close</p>
+                <p id="summaryAverageClose" class="text-3xl font-bold mt-3">0.0</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-semibold">Views vs Applications</h2>
+                        <p class="text-sm text-gray-500">Por vacante</p>
+                    </div>
+                </div>
+                <div class="w-full">
+                    <canvas id="viewsApplicationsChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-semibold">Candidates by Status</h2>
+                        <p class="text-sm text-gray-500">Distribución por estado</p>
+                    </div>
+                </div>
+                <div class="w-full">
+                    <canvas id="candidatesStatusChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const companyId = {{ company.id }};
+const metricsUrl = '{% url "company_metrics_api" company.id %}';
+const monthSelect = document.getElementById('monthSelect');
+const yearSelect = document.getElementById('yearSelect');
+const refreshButton = document.getElementById('refreshButton');
+const loadingState = document.getElementById('loadingState');
+const emptyState = document.getElementById('emptyState');
+const dashboardContent = document.getElementById('dashboardContent');
+const filterLabel = document.getElementById('filterLabel');
+const summaryTotalViews = document.getElementById('summaryTotalViews');
+const summaryTotalApplications = document.getElementById('summaryTotalApplications');
+const summaryAverageClose = document.getElementById('summaryAverageClose');
+
+let viewsApplicationsChart = null;
+let candidatesStatusChart = null;
+
+function buildFilterLabel(month, year) {
+    if (month && year) {
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return `${monthNames[month - 1]} ${year}`;
+    }
+    if (year) {
+        return year;
+    }
+    return 'All time';
+}
+
+function showLoading() {
+    loadingState.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+    dashboardContent.classList.add('hidden');
+}
+
+function showEmpty() {
+    loadingState.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    dashboardContent.classList.add('hidden');
+}
+
+function showDashboard() {
+    loadingState.classList.add('hidden');
+    emptyState.classList.add('hidden');
+    dashboardContent.classList.remove('hidden');
+}
+
+function createChart(context, config) {
+    if (context.chart) {
+        context.chart.destroy();
+    }
+    return new Chart(context, config);
+}
+
+function renderCharts(data) {
+    const labels = data.views_vs_applications.map(item => item.title);
+    const viewsData = data.views_vs_applications.map(item => item.views_count);
+    const applicationsData = data.views_vs_applications.map(item => item.applications_count);
+    const statusLabels = data.candidates_by_status.map(item => item.label);
+    const statusCounts = data.candidates_by_status.map(item => item.count);
+
+    const viewsCtx = document.getElementById('viewsApplicationsChart').getContext('2d');
+    const statusCtx = document.getElementById('candidatesStatusChart').getContext('2d');
+
+    if (viewsApplicationsChart) {
+        viewsApplicationsChart.destroy();
+    }
+    if (candidatesStatusChart) {
+        candidatesStatusChart.destroy();
+    }
+
+    viewsApplicationsChart = new Chart(viewsCtx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Views',
+                    data: viewsData,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                },
+                {
+                    label: 'Applications',
+                    data: applicationsData,
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { stacked: false },
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    candidatesStatusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusCounts,
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(234, 88, 12, 0.8)',
+                ],
+                borderColor: '#fff',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+}
+
+async function loadMetrics() {
+    showLoading();
+    const month = monthSelect.value;
+    const year = yearSelect.value;
+    const params = new URLSearchParams();
+    if (month) params.append('month', month);
+    if (year) params.append('year', year);
+
+    filterLabel.textContent = buildFilterLabel(month ? parseInt(month) : null, year ? parseInt(year) : null);
+
+    try {
+        const response = await fetch(`${metricsUrl}?${params.toString()}`);
+        if (!response.ok) {
+            throw new Error('Failed to load metrics');
+        }
+        const data = await response.json();
+
+        if (!data.views_vs_applications.length && data.candidates_by_status.every(item => item.count === 0)) {
+            showEmpty();
+            return;
+        }
+
+        summaryTotalViews.textContent = data.totals.total_views;
+        summaryTotalApplications.textContent = data.totals.total_applications;
+        summaryAverageClose.textContent = data.totals.average_time_to_close_days.toFixed(1);
+
+        renderCharts(data);
+        showDashboard();
+    } catch (error) {
+        emptyState.textContent = 'Unable to load analytics. Please try again later.';
+        showEmpty();
+        console.error(error);
+    }
+}
+
+refreshButton.addEventListener('click', event => {
+    event.preventDefault();
+    loadMetrics();
+});
+
+loadMetrics();
+</script>
+
+{% endblock %}

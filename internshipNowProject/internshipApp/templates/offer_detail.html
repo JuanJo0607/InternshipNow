@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ offer.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
+    <div class="flex items-center justify-between mb-6 gap-4 flex-wrap">
+        <div>
+            <h2 class="text-3xl font-bold mb-2">{{ offer.title }}</h2>
+            <p class="text-sm text-gray-500">{{ offer.company.company_name }}</p>
+        </div>
+        <div class="flex gap-3 flex-wrap">
+            <a href="{% url 'student_offers' %}" class="text-blue-500 hover:underline">← Back to Offers</a>
+            <a href="{% url 'student_applications' %}" class="text-green-500 hover:underline">My Applications</a>
+        </div>
+    </div>
+
+    <div class="grid gap-4">
+        <div>
+            <p class="text-gray-700"><strong>Location:</strong> {{ offer.location }}</p>
+            <p class="text-gray-700"><strong>Salary:</strong> {{ offer.salary }}</p>
+            <p class="text-gray-700"><strong>Modality:</strong> {{ offer.get_modality_display }}</p>
+            <p class="text-gray-700"><strong>Status:</strong> {{ offer.get_status_display }}</p>
+            {% if offer.closed_at %}
+                <p class="text-gray-700"><strong>Closed at:</strong> {{ offer.closed_at|date:'Y-m-d' }}</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-xl font-semibold mb-2">Description</h3>
+            <p class="text-gray-800">{{ offer.description }}</p>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-xl font-semibold mb-2">Requirements</h3>
+            <p class="text-gray-800">{{ offer.requirements }}</p>
+        </div>
+
+        <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-xl font-semibold mb-2">Desired Skills</h3>
+            <p class="text-gray-800">{{ offer.desired_skills }}</p>
+        </div>
+
+        <div class="mt-4">
+            {% if applied %}
+                <span class="inline-flex items-center rounded-full bg-green-100 text-green-800 px-4 py-2 font-semibold">
+                    You have already applied to this offer.
+                </span>
+            {% else %}
+                <a href="{% url 'apply_to_offer' offer.id %}" class="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700">
+                    Apply Now
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

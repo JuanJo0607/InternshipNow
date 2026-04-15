@@ -1,7 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.utils import timezone
 from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm, StudentCVForm, ApplicationStatusForm
-from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
+from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication, InternshipOfferView
+from .services import getViewsVsApplicationsPerJob, getAverageTimeToClose, getCandidatesByStatus
 from django.contrib.auth import authenticate, login
 from .matching import annotate_offers_with_score
 
@@ -143,7 +146,7 @@ def company_offers(request):
         return redirect('home')
     profile = CompanyProfile.objects.get(user=request.user)
     offers = profile.offers.all().order_by('-created_at')
-    return render(request, 'company_offers.html', {'offers': offers})
+    return render(request, 'company_offers.html', {'offers': offers, 'profile': profile})
 
 
 @login_required
@@ -186,8 +189,79 @@ def close_offer(request, offer_id):
     profile = CompanyProfile.objects.get(user=request.user)
     offer = InternshipOffer.objects.get(id=offer_id, company=profile)
     offer.status = 'closed'
+    offer.closed_at = timezone.now()
     offer.save()
     return redirect('company_offers')
+
+
+@login_required
+def offer_detail(request, offer_id):
+    if request.user.role != 'student':
+        return redirect('home')
+
+    try:
+        profile = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        return redirect('home')
+
+    offer = get_object_or_404(InternshipOffer.objects.select_related('company'), id=offer_id, status='open')
+    InternshipOfferView.objects.create(offer=offer, student=profile)
+    applied = InternshipApplication.objects.filter(student=profile, offer=offer).exists()
+
+    return render(request, 'offer_detail.html', {
+        'offer': offer,
+        'applied': applied,
+    })
+
+
+@login_required
+def company_metrics_page(request, company_id):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    if profile.id != company_id:
+        return redirect('home')
+    return render(request, 'company_metrics.html', {'company': profile})
+
+
+@login_required
+def company_metrics_api(request, id):
+    company_id = id
+    if request.user.role != 'company':
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
+    profile = CompanyProfile.objects.get(user=request.user)
+    if profile.id != company_id:
+        return JsonResponse({'error': 'Not found'}, status=404)
+
+    filters = {}
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+    try:
+        if month:
+            filters['month'] = int(month)
+        if year:
+            filters['year'] = int(year)
+    except ValueError:
+        return JsonResponse({'error': 'Invalid month or year'}, status=400)
+
+    metrics = getViewsVsApplicationsPerJob(company_id, filters)
+    average_time_to_close = getAverageTimeToClose(company_id, filters)
+    candidates_by_status = getCandidatesByStatus(company_id, filters)
+
+    total_views = sum(item['views_count'] for item in metrics)
+    total_applications = sum(item['applications_count'] for item in metrics)
+
+    return JsonResponse({
+        'views_vs_applications': metrics,
+        'average_time_to_close_days': average_time_to_close,
+        'candidates_by_status': candidates_by_status,
+        'totals': {
+            'total_views': total_views,
+            'total_applications': total_applications,
+            'average_time_to_close_days': average_time_to_close,
+        }
+    })
 
 
 # ----- Application views (US-08) -----
