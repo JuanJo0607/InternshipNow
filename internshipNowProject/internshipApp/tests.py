@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.test import TestCase, Client
 from django.urls import reverse
 from .models import User, CompanyProfile, InternshipOffer
@@ -152,3 +153,8 @@ class InternshipApplicationTests(TestCase):
         response = self.client.post(reverse('update_application_status', args=[application.id]), {'status': 'rejected'})
         application.refresh_from_db()
         self.assertEqual(application.status, 'accepted')
+=======
+from django.test import TestCase
+
+# Create your tests here.
+>>>>>>> feature/US-09-FE-notification-center

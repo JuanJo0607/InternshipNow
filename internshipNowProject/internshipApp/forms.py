@@ -1,6 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+<<<<<<< HEAD
 from .models import User, StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
+=======
+from .models import User, StudentProfile, CompanyProfile
+>>>>>>> feature/US-09-FE-notification-center
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -18,6 +22,7 @@ class CompanyProfileForm(forms.ModelForm):
     class Meta:
         model = CompanyProfile
         fields = ['company_name', 'industry', 'description']
+<<<<<<< HEAD
 
 
 class InternshipOfferForm(forms.ModelForm):
@@ -68,3 +73,5 @@ class StudentCVForm(forms.ModelForm):
             if file.size > 5 * 1024 * 1024:  # 5 MB límite
                 raise forms.ValidationError('File size must be under 5 MB.')
         return file
+=======
+>>>>>>> feature/US-09-FE-notification-center

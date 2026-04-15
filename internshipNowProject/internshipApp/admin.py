@@ -1,4 +1,5 @@
 from django.contrib import admin
+<<<<<<< HEAD
 from .models import User, StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
 
 
@@ -7,6 +8,9 @@ class InternshipOfferAdmin(admin.ModelAdmin):
     list_display = ('title', 'company', 'status', 'created_at')
     list_filter = ('status', 'company')
     search_fields = ('title', 'description', 'requirements', 'desired_skills')
+=======
+from .models import User, StudentProfile, CompanyProfile
+>>>>>>> feature/US-09-FE-notification-center
 
 admin.site.register(User)
 admin.site.register(StudentProfile)
