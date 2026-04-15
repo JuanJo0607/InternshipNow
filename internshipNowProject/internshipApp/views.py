@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm, StudentCVForm, ApplicationStatusForm
 from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
 from django.contrib.auth import authenticate, login
-from .matching import annotate_offers_with_score, get_suggestions
+from .matching import annotate_offers_with_score, get_suggestions, rank_candidates_for_offer
 
 
 
@@ -292,4 +292,29 @@ def matching_offers(request):
         'student_career': student_career,
         'mode': suggestions['mode'],
         'applied_ids': applied_ids,
+    })
+
+
+@login_required
+def candidate_ranking(request, offer_id):
+    """
+    FR-13 - Candidate Recommendation for Companies.
+    Muestra el ranking de estudiantes que aplicaron a la oferta,
+    ordenados por compatibilidad con las habilidades requeridas.
+    """
+    if request.user.role != 'company':
+        return redirect('home')
+
+    profile = CompanyProfile.objects.get(user=request.user)
+    offer = InternshipOffer.objects.get(id=offer_id, company=profile)
+
+    # Solo estudiantes que aplicaron a esta oferta específica
+    applications = InternshipApplication.objects.filter(offer=offer).select_related('student__user')
+    students = [app.student for app in applications]
+
+    ranked = rank_candidates_for_offer(offer, students)
+
+    return render(request, 'candidate_ranking.html', {
+        'offer': offer,
+        'ranked_candidates': ranked,
     })

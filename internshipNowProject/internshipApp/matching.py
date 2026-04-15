@@ -143,3 +143,43 @@ def _score_color_bar(score: int) -> str:
         return 'bg-orange-400'
     else:
         return 'bg-gray-300'
+    
+
+def rank_candidates_for_offer(offer, students) -> list[dict]:
+    """
+    FR-13 - Candidate Recommendation for Companies.
+
+    Recibe una InternshipOffer y un queryset de StudentProfile.
+    Retorna una lista de dicts ordenada de mayor a menor score,
+    incluyendo solo estudiantes con score > 0.
+
+    Cada dict contiene:
+        - 'student': instancia de StudentProfile
+        - 'score': int 0-100
+        - 'score_label': str
+        - 'score_color': clases Tailwind para badge
+        - 'score_color_bar': clase Tailwind para barra
+        - 'matched_skills': set de skills en común
+    """
+    result = []
+    offer_skills = normalize_skills(offer.desired_skills)
+
+    for student in students:
+        if not student.skills:
+            continue
+        student_skills = normalize_skills(student.skills)
+        matched = student_skills & offer_skills
+        score = int((len(matched) / len(offer_skills)) * 100) if offer_skills else 0
+        if score == 0:
+            continue
+        result.append({
+            'student': student,
+            'score': score,
+            'score_label': _score_label(score),
+            'score_color': _score_color(score),
+            'score_color_bar': _score_color_bar(score),
+            'matched_skills': matched,
+        })
+
+    result.sort(key=lambda x: x['score'], reverse=True)
+    return result

@@ -20,4 +20,5 @@ urlpatterns = [
     # US-08 company application management
     path('company/applications/', views.company_applications, name='company_applications'),
     path('company/applications/<int:application_id>/status/', views.update_application_status, name='update_application_status'),
+    path('company/offers/<int:offer_id>/candidates/', views.candidate_ranking, name='candidate_ranking'),
 ]
