@@ -7,9 +7,8 @@
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-2xl font-bold">Available Internship Offers</h2>
         <div class="flex gap-3 items-center">
-            {# FR-11: acceso directo a la vista de matching #}
             <a href="{% url 'matching_offers' %}" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm">
-                 Best matches for me
+                Best matches for me
             </a>
             <a href="{% url 'student_applications' %}" class="text-green-500 hover:underline">View My Applications</a>
             <a href="{% url 'student_profile' %}" class="text-blue-500 hover:underline">← Back to Profile</a>
@@ -18,20 +17,33 @@
 
     {% if not student_skills %}
         <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-4 text-sm">
-             You haven't added any skills to your profile yet.
+            You haven't added any skills to your profile yet.
             <a href="{% url 'student_profile' %}" class="underline font-semibold">Update your profile</a>
             to see your compatibility score with each offer.
         </div>
     {% endif %}
 
-    <form method="get" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <input
-            type="text"
-            name="location"
-            placeholder="Location"
-            value="{{ filters.location }}"
-            class="border p-2 rounded"
-        >
+    <form method="get" id="filter-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+        {# Location con autocompletado estricto #}
+        <div class="relative">
+            <input
+                type="text"
+                name="location"
+                id="location-input"
+                placeholder="Location"
+                value="{{ filters.location }}"
+                autocomplete="off"
+                class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+            <ul id="location-dropdown"
+                class="absolute z-10 w-full bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-y-auto hidden">
+            </ul>
+            <p id="location-error" class="text-xs text-red-500 mt-1 hidden">
+                No offers available in this location.
+            </p>
+        </div>
+
         <input
             type="number"
             step="0.01"
@@ -40,19 +52,30 @@
             value="{{ filters.salary }}"
             class="border p-2 rounded"
         >
+
         <select name="modality" class="border p-2 rounded">
             <option value="">All modalities</option>
             <option value="presencial" {% if filters.modality == 'presencial' %}selected{% endif %}>Presencial</option>
             <option value="virtual"    {% if filters.modality == 'virtual'    %}selected{% endif %}>Virtual</option>
             <option value="hibrido"    {% if filters.modality == 'hibrido'    %}selected{% endif %}>Híbrido</option>
         </select>
-        <input
-            type="text"
-            name="skill"
-            placeholder="Required skill"
-            value="{{ filters.skill }}"
-            class="border p-2 rounded"
-        >
+
+        {# Skill con autocompletado de la lista global #}
+        <div class="relative">
+            <input
+                type="text"
+                name="skill"
+                id="skill-input"
+                placeholder="Required skill"
+                value="{{ filters.skill }}"
+                autocomplete="off"
+                class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+            <ul id="skill-dropdown"
+                class="absolute z-10 w-full bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-y-auto hidden">
+            </ul>
+        </div>
+
         <div class="md:col-span-2 flex gap-3">
             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                 Search
@@ -69,23 +92,18 @@
             <li class="border p-4 rounded">
                 <div class="flex justify-between items-start">
                     <h3 class="text-xl font-semibold">{{ item.offer.title }}</h3>
-
-                    {# FR-11 - Badge de compatibilidad #}
                     {% if student_skills %}
                         <span class="text-xs font-semibold px-3 py-1 rounded-full {{ item.score_color }}">
                             {{ item.score }}% - {{ item.score_label }}
                         </span>
                     {% endif %}
                 </div>
-
                 <p class="text-gray-700"><strong>Company:</strong> {{ item.offer.company.company_name }}</p>
                 <p class="mt-2"><strong>Description:</strong> {{ item.offer.description|truncatechars:150 }}</p>
                 <p><strong>Location:</strong> {{ item.offer.location }}</p>
                 <p><strong>Salary:</strong> {{ item.offer.salary }}</p>
                 <p><strong>Modality:</strong> {{ item.offer.get_modality_display }}</p>
                 <p><strong>Skills:</strong> {{ item.offer.desired_skills }}</p>
-
-                {# FR-11 - Barra de progreso del score #}
                 {% if student_skills %}
                 <div class="mt-3">
                     <div class="w-full bg-gray-200 rounded-full h-2">
@@ -95,8 +113,6 @@
                     </div>
                 </div>
                 {% endif %}
-
-                {# US-08 - Botón de aplicar #}
                 <div class="mt-3">
                     {% if item.offer.id in applied_ids %}
                         <span class="text-gray-500">Applied</span>
@@ -111,4 +127,105 @@
     <p>No internship offers match the selected filters.</p>
     {% endif %}
 </div>
+
+<script>
+const LOCATIONS = {{ available_locations|safe }};
+
+const SKILLS_LIST = [
+  "Python","Java","JavaScript","TypeScript","C","C++","C#","Go","Rust","Swift","Kotlin","Ruby","PHP","Scala","R","MATLAB","Perl","Haskell","Dart","Lua","Shell Scripting","Bash","PowerShell",
+  "HTML","CSS","React.js","Angular","Vue.js","Next.js","Nuxt.js","Svelte","jQuery","Bootstrap","Tailwind CSS","Sass","LESS","Webpack","Vite","Responsive Design","Web Accessibility","Progressive Web Apps",
+  "Django","Flask","FastAPI","Node.js","Express.js","Spring Boot","Laravel","Ruby on Rails","ASP.NET","NestJS","GraphQL","REST APIs","SOAP","gRPC","WebSockets","OAuth","JWT",
+  "React Native","Flutter","Android Development","iOS Development","Xamarin","Ionic","Expo",
+  "SQL","MySQL","PostgreSQL","SQLite","Microsoft SQL Server","Oracle Database","MongoDB","Redis","Cassandra","Firebase","DynamoDB","Elasticsearch","Neo4j","MariaDB","CouchDB",
+  "AWS","Google Cloud Platform","Microsoft Azure","Docker","Kubernetes","Terraform","Ansible","Jenkins","GitHub Actions","GitLab CI/CD","CI/CD","Linux","Nginx","Apache","Heroku","Vercel","Netlify","CloudFormation","Serverless","Microservices",
+  "Machine Learning","Deep Learning","Natural Language Processing","Computer Vision","TensorFlow","PyTorch","Keras","Scikit-learn","Pandas","NumPy","Matplotlib","Seaborn","Jupyter Notebooks","Data Analysis","Data Visualization","Data Wrangling","Feature Engineering","Statistical Modeling","A/B Testing","Time Series Analysis","Reinforcement Learning","Generative AI","Large Language Models","Hugging Face","OpenCV","NLTK","SpaCy",
+  "Apache Spark","Apache Kafka","Apache Airflow","Hadoop","ETL Pipelines","Data Warehousing","Data Modeling","dbt","Snowflake","BigQuery","Power BI","Tableau","Looker","Metabase",
+  "Git","GitHub","GitLab","Bitbucket","Code Review","Pair Programming",
+  "Object-Oriented Programming","Functional Programming","Design Patterns","Clean Code","SOLID Principles","Microservices Architecture","Event-Driven Architecture","Domain-Driven Design","Test-Driven Development","Behavior-Driven Development","Refactoring","API Design",
+  "Unit Testing","Integration Testing","End-to-End Testing","Selenium","Cypress","Jest","Pytest","JUnit","Postman","Load Testing","Performance Testing","Test Automation","Quality Assurance",
+  "Cybersecurity","Penetration Testing","Ethical Hacking","OWASP","Cryptography","Network Security","Firewalls","VPN","SSL/TLS","Identity and Access Management","SIEM","Vulnerability Assessment","Security Auditing","Networking","TCP/IP","DNS","HTTP/HTTPS",
+  "UI Design","UX Design","UI/UX Design","Figma","Adobe XD","Sketch","Wireframing","Prototyping","User Research","Usability Testing","Information Architecture","Interaction Design","Design Systems","Adobe Photoshop","Adobe Illustrator","Canva",
+  "Agile","Scrum","Kanban","SAFe","Lean","Waterfall","Project Management","Product Management","Jira","Trello","Asana","Confluence","Sprint Planning","Backlog Management","Stakeholder Management",
+  "Technical Writing","Documentation","Public Speaking","Teamwork","Problem Solving","Critical Thinking","Time Management","Leadership","Communication","Adaptability","Mentoring",
+  "Operating Systems","Distributed Systems","System Design","High Availability","Scalability","Load Balancing","Caching","Message Queues","RabbitMQ","Celery",
+  "Blockchain","Smart Contracts","Solidity","Web3","IoT","Augmented Reality","Virtual Reality","Edge Computing","Quantum Computing",
+  "SAP","Salesforce","Microsoft Office","Excel","Power Automate","SharePoint","Dynamics 365"
+];
+
+function makeAutocomplete({ inputId, dropdownId, errorId, list, strict }) {
+    const input    = document.getElementById(inputId);
+    const dropdown = document.getElementById(dropdownId);
+    const errorEl  = errorId ? document.getElementById(errorId) : null;
+    let highlighted = -1;
+
+    function showDropdown(query) {
+        const filtered = list.filter(item =>
+            item.toLowerCase().includes(query.toLowerCase())
+        ).slice(0, 8);
+        if (!filtered.length || !query) { hideDropdown(); return; }
+        highlighted = -1;
+        dropdown.innerHTML = '';
+        filtered.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm text-gray-700';
+            li.textContent = item;
+            li.addEventListener('mousedown', e => {
+                e.preventDefault();
+                input.value = item;
+                hideDropdown();
+                if (errorEl) errorEl.classList.add('hidden');
+                input.classList.remove('border-red-400');
+            });
+            dropdown.appendChild(li);
+        });
+        dropdown.classList.remove('hidden');
+    }
+
+    function hideDropdown() {
+        dropdown.classList.add('hidden');
+        highlighted = -1;
+    }
+
+    function updateHighlight() {
+        [...dropdown.querySelectorAll('li')].forEach((li, i) => {
+            li.classList.toggle('bg-blue-100', i === highlighted);
+        });
+    }
+
+    input.addEventListener('input', function () {
+        showDropdown(this.value);
+        if (errorEl) errorEl.classList.add('hidden');
+        input.classList.remove('border-red-400');
+    });
+
+    input.addEventListener('keydown', function (e) {
+        const items = [...dropdown.querySelectorAll('li')];
+        if (e.key === 'ArrowDown') { e.preventDefault(); highlighted = Math.min(highlighted + 1, items.length - 1); updateHighlight(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); highlighted = Math.max(highlighted - 1, 0); updateHighlight(); }
+        else if (e.key === 'Enter' && highlighted >= 0 && items[highlighted]) {
+            e.preventDefault();
+            input.value = items[highlighted].textContent;
+            hideDropdown();
+        } else if (e.key === 'Escape') { hideDropdown(); }
+    });
+
+    input.addEventListener('blur', function () {
+        setTimeout(hideDropdown, 150);
+        if (strict && this.value) {
+            const match = list.find(item => item.toLowerCase() === this.value.toLowerCase());
+            if (!match) {
+                if (errorEl) errorEl.classList.remove('hidden');
+                input.classList.add('border-red-400');
+            } else {
+                input.value = match;
+                input.classList.remove('border-red-400');
+                if (errorEl) errorEl.classList.add('hidden');
+            }
+        }
+    });
+}
+
+makeAutocomplete({ inputId: 'location-input', dropdownId: 'location-dropdown', errorId: 'location-error', list: LOCATIONS, strict: true });
+makeAutocomplete({ inputId: 'skill-input',    dropdownId: 'skill-dropdown',    errorId: null,             list: SKILLS_LIST,  strict: false });
+</script>
 {% endblock %}

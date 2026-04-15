@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm, StudentCVForm, ApplicationStatusForm
 from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
 from django.contrib.auth import authenticate, login
-from .matching import annotate_offers_with_score
+from .matching import annotate_offers_with_score, get_suggestions
 
 
 
@@ -47,10 +47,19 @@ def student_offers(request):
         InternshipApplication.objects.filter(student__user=request.user).values_list('offer_id', flat=True)
     )
 
+        # Al final de student_offers, antes del return render:
+    available_locations = list(
+        InternshipOffer.objects.filter(status='open')
+        .exclude(location='')
+        .values_list('location', flat=True)
+        .distinct()
+    )
+
     return render(request, 'student_offers.html', {
         'ranked_offers': ranked_offers,
         'student_skills': student_skills,
         'applied_ids': applied_ids,
+        'available_locations': available_locations,
         'filters': {
             'location': location,
             'salary':   salary,
@@ -259,25 +268,28 @@ def upload_cv(request):
 
 @login_required
 def matching_offers(request):
-    """
-    FR-11 - Vista dedicada: muestra SOLO las ofertas con score > 0,
-    ordenadas de mayor a menor compatibilidad. No aplica filtros adicionales.
-    """
     if request.user.role != 'student':
         return redirect('home')
 
     try:
         profile = StudentProfile.objects.get(user=request.user)
         student_skills = profile.skills
+        student_career = profile.career
     except StudentProfile.DoesNotExist:
         student_skills = ''
+        student_career = ''
 
     offers = InternshipOffer.objects.filter(status='open')
-    ranked_offers = annotate_offers_with_score(offers, student_skills)
+    suggestions = get_suggestions(offers, student_skills, student_career)
 
-    matched = [r for r in ranked_offers if r['score'] > 0]
+    applied_ids = list(
+        InternshipApplication.objects.filter(student__user=request.user).values_list('offer_id', flat=True)
+    )
 
     return render(request, 'matching_offers.html', {
-        'ranked_offers': matched,
+        'ranked_offers': suggestions['ranked_offers'],
         'student_skills': student_skills,
+        'student_career': student_career,
+        'mode': suggestions['mode'],
+        'applied_ids': applied_ids,
     })

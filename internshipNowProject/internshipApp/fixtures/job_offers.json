@@ -46,5 +46,117 @@
       "status": "open",
       "created_at": "2026-03-03T12:00:00Z"
     }
+  },
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 4,
+    "fields": {
+      "company": 3,
+      "title": "AI Research Intern",
+      "description": "Support our artificial intelligence research team in developing and evaluating machine learning models. Work on computer science problems applied to real-world datasets.",
+      "requirements": "Background in computer science or artificial intelligence. Familiarity with Python and deep learning frameworks.",
+      "desired_skills": "Python, TensorFlow, Machine Learning, Research",
+      "location": "Medellín",
+      "salary": "1400.00",
+      "modality": "hibrido",
+      "status": "open",
+      "created_at": "2026-03-04T09:00:00Z"
+    }
+  },
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 5,
+    "fields": {
+      "company": 3,
+      "title": "Full Stack Developer Intern",
+      "description": "Build and maintain web applications using Django and React.js. Collaborate with the computer science team on software architecture decisions.",
+      "requirements": "Knowledge of Python, Django, and JavaScript. Understanding of software engineering principles.",
+      "desired_skills": "Python, Django, React.js, SQL",
+      "location": "Bogotá",
+      "salary": "1250.00",
+      "modality": "presencial",
+      "status": "open",
+      "created_at": "2026-03-05T10:00:00Z"
+    }
+  },
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 6,
+    "fields": {
+      "company": 3,
+      "title": "DevOps Intern",
+      "description": "Assist in managing CI/CD pipelines and cloud infrastructure. Work alongside our engineering team to automate deployments.",
+      "requirements": "Basic understanding of Linux and cloud platforms. Experience with Git and scripting.",
+      "desired_skills": "Docker, AWS, Git, Linux, CI/CD",
+      "location": "Remote",
+      "salary": "1150.00",
+      "modality": "virtual",
+      "status": "open",
+      "created_at": "2026-03-06T08:00:00Z"
+    }
+  },
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 7,
+    "fields": {
+      "company": 3,
+      "title": "Mobile Developer Intern",
+      "description": "Develop and maintain mobile applications for Android and iOS platforms using React Native.",
+      "requirements": "Experience with JavaScript and mobile development frameworks.",
+      "desired_skills": "React.js, JavaScript, Figma, Agile",
+      "location": "Medellín",
+      "salary": "1050.00",
+      "modality": "presencial",
+      "status": "open",
+      "created_at": "2026-03-07T11:00:00Z"
+    }
+  },
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 8,
+    "fields": {
+      "company": 3,
+      "title": "Cybersecurity Intern",
+      "description": "Assist in vulnerability assessments and security audits of our systems. Work with the security team on threat analysis.",
+      "requirements": "Knowledge of networking and security fundamentals. Familiarity with Linux environments.",
+      "desired_skills": "Linux, Networking, Python, Security Auditing",
+      "location": "Bogotá",
+      "salary": "1300.00",
+      "modality": "hibrido",
+      "status": "open",
+      "created_at": "2026-03-08T09:00:00Z"
+    }
+  },
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 9,
+    "fields": {
+      "company": 3,
+      "title": "UX/UI Design Intern",
+      "description": "Create wireframes, prototypes, and design systems for our web and mobile products.",
+      "requirements": "Portfolio demonstrating UI/UX projects. Proficiency in design tools.",
+      "desired_skills": "Figma, UI/UX Design, Responsive Design, Prototyping",
+      "location": "Remote",
+      "salary": "1000.00",
+      "modality": "virtual",
+      "status": "open",
+      "created_at": "2026-03-09T10:00:00Z"
+    }
+  },
+  {
+    "model": "internshipApp.internshipoffer",
+    "pk": 10,
+    "fields": {
+      "company": 3,
+      "title": "Data Engineering Intern",
+      "description": "Design and maintain data pipelines for our analytics platform. Work with SQL databases and cloud storage solutions.",
+      "requirements": "Knowledge of SQL and Python. Familiarity with data warehousing concepts.",
+      "desired_skills": "SQL, Python, AWS, Data Visualization",
+      "location": "Remote",
+      "salary": "1350.00",
+      "modality": "virtual",
+      "status": "open",
+      "created_at": "2026-03-10T08:00:00Z"
+    }
   }
 ]
