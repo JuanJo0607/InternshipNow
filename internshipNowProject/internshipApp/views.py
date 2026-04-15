@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm, StudentCVForm, ApplicationStatusForm
 from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication, Notification
 from django.contrib.auth import authenticate, login
@@ -9,6 +9,7 @@ from .matching import annotate_offers_with_score, get_suggestions, rank_candidat
 from django.core.mail import send_mail
 from django.conf import settings
 from django.views.decorators.http import require_POST
+from .services import is_profile_complete
 
 
 @login_required
@@ -130,6 +131,13 @@ def custom_login(request):
 
         if user is not None:
             login(request, user)
+
+            # US-14: Check profile completeness for students
+            if user.role == 'student':
+                profile_status = is_profile_complete(user)
+                if not profile_status['complete']:
+                    missing = ', '.join(profile_status['missing_fields'])
+                    messages.warning(request, f"Your profile is incomplete. Missing: {missing}. Please complete it to improve your opportunities.")
 
             if user.role == 'student':
                 return redirect('student_profile')
@@ -315,3 +323,12 @@ def create_preselection_notification(user, vacancy_title, match_percentage):
         notification_type='preselection',
     )
     return notification
+
+# US-14: API endpoint for profile completeness status
+@login_required
+def profile_status(request):
+    """
+    Returns JSON with profile completeness status.
+    """
+    status = is_profile_complete(request.user)
+    return JsonResponse(status)
