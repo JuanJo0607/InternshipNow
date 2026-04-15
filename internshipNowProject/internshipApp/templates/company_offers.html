@@ -25,10 +25,10 @@
         <table class="w-full table-auto">
             <thead>
                 <tr>
-                    <th class="px-4 py-2">Title</th>
-                    <th class="px-4 py-2">Status</th>
-                    <th class="px-4 py-2">Created</th>
-                    <th class="px-4 py-2">Actions</th>
+                    <th class="px-4 py-2 text-left">Title</th>
+                    <th class="px-4 py-2 text-left">Status</th>
+                    <th class="px-4 py-2 text-left">Created</th>
+                    <th class="px-4 py-2 text-left">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,8 +40,12 @@
                     <td class="px-4 py-2 space-x-2">
                         <a href="{% url 'edit_offer' offer.id %}" class="text-blue-500 hover:underline">Edit</a>
                         {% if offer.status == 'open' %}
-                        <a href="{% url 'close_offer' offer.id %}" class="text-red-500 hover:underline">Close</a>
+                            <a href="{% url 'close_offer' offer.id %}" class="text-red-500 hover:underline">Close</a>
                         {% endif %}
+                        {# FR-13 - Ranking de candidatos #}
+                        <a href="{% url 'candidate_ranking' offer.id %}" class="text-indigo-500 hover:underline">
+                             Candidates
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}

@@ -25,4 +25,5 @@ urlpatterns = [
     path('company/applications/<int:application_id>/status/', views.update_application_status, name='update_application_status'),
     # US-14: Profile status API
     path('api/profile-status/', views.profile_status, name='profile_status'),
+    path('company/offers/<int:offer_id>/candidates/', views.candidate_ranking, name='candidate_ranking'),
 ]

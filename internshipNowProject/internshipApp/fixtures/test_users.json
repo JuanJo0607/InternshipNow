@@ -63,7 +63,7 @@
         "user": 6,
         "university": "Stanford University",
         "career": "Computer Science & Artificial Intelligence",
-        "skills": "Python, Java, React.js, Machine Learning (TensorFlow), SQL Database Management, UI/UX Design (Figma), Agile Methodologies, and Technical Writing.",
+        "skills": "Python, Django, SQL, React.js, Machine Learning, Git, Docker, Figma",
         "bio": "Passionate junior-year student with a focus on building accessible and scalable web applications. I have experience working on open-source projects and love solving complex algorithmic challenges. Currently looking for a summer internship where I can apply my full-stack development skills and learn from industry leaders in the tech space."
     }
 },

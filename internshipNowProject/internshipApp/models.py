@@ -12,7 +12,7 @@ class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     university = models.CharField(max_length=255)
     career = models.CharField(max_length=255)
-    skills = models.TextField()
+    skills = models.TextField(blank=True)  
     bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)  # <-- línea nueva
 

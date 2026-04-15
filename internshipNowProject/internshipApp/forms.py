@@ -13,6 +13,8 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class StudentProfileForm(forms.ModelForm):
+    skills = forms.CharField(required=False, widget=forms.Textarea)
+    
     class Meta:
         model = StudentProfile
         fields = ['university', 'career', 'skills', 'bio']
