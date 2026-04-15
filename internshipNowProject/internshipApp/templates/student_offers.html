@@ -68,7 +68,11 @@
         {% for item in ranked_offers %}
             <li class="border p-4 rounded">
                 <div class="flex justify-between items-start">
-                    <h3 class="text-xl font-semibold">{{ item.offer.title }}</h3>
+                    <h3 class="text-xl font-semibold">
+                        <a href="{% url 'offer_detail' item.offer.id %}" class="text-blue-700 hover:text-blue-900 hover:underline">
+                            {{ item.offer.title }}
+                        </a>
+                    </h3>
 
                     {# FR-11 - Badge de compatibilidad #}
                     {% if student_skills %}

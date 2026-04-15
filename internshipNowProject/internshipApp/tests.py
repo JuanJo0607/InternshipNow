@@ -1,10 +1,10 @@
-<<<<<<< HEAD
+from datetime import timedelta
 from django.test import TestCase, Client
 from django.urls import reverse
-from .models import User, CompanyProfile, InternshipOffer
+from django.utils import timezone
+from .models import User, CompanyProfile, InternshipOffer, StudentProfile, InternshipApplication, InternshipOfferView
 
-from django.test import TestCase #US-11
-from .matching import calculate_match_score, normalize_skills, annotate_offers_with_score #US-11
+from .matching import calculate_match_score, normalize_skills, annotate_offers_with_score
 
 
 
@@ -45,6 +45,49 @@ class InternshipOfferTests(TestCase):
         )
         response = self.client.get(reverse('company_offers'))
         self.assertContains(response, 'Internship 2')
+
+
+class CompanyMetricsTests(TestCase):
+    def setUp(self):
+        self.company_user = User.objects.create_user(username='comp', password='pass', role='company')
+        self.company_profile = CompanyProfile.objects.create(user=self.company_user, company_name='CompCo', industry='Tech', description='Desc')
+        self.offer = InternshipOffer.objects.create(
+            company=self.company_profile,
+            title='Internship 1',
+            description='Desc',
+            requirements='Reqs',
+            desired_skills='Skills',
+            location='City',
+            salary='1000.00',
+            modality='presencial',
+            status='open'
+        )
+        self.student_user = User.objects.create_user(username='stud', password='pass', role='student')
+        self.student_profile = StudentProfile.objects.create(user=self.student_user, university='U', career='C', skills='S')
+        self.client = Client()
+
+    def test_offer_detail_records_view(self):
+        self.client.login(username='stud', password='pass')
+        response = self.client.get(reverse('offer_detail', args=[self.offer.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(InternshipOfferView.objects.filter(offer=self.offer, student=self.student_profile).exists())
+
+    def test_company_metrics_api_returns_counts(self):
+        InternshipOfferView.objects.create(offer=self.offer, student=self.student_profile)
+        InternshipApplication.objects.create(student=self.student_profile, offer=self.offer)
+        self.offer.status = 'closed'
+        self.offer.closed_at = timezone.now() + timedelta(days=4)
+        self.offer.save()
+
+        self.client.login(username='comp', password='pass')
+        response = self.client.get(reverse('company_metrics_api', args=[self.company_profile.id]))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['totals']['total_views'], 1)
+        self.assertEqual(data['totals']['total_applications'], 1)
+        self.assertGreaterEqual(data['totals']['average_time_to_close_days'], 4.0)
+
+
 #US-11
 class NormalizeSkillsTest(TestCase):
     def test_basic_normalization(self):
@@ -153,8 +196,3 @@ class InternshipApplicationTests(TestCase):
         response = self.client.post(reverse('update_application_status', args=[application.id]), {'status': 'rejected'})
         application.refresh_from_db()
         self.assertEqual(application.status, 'accepted')
-=======
-from django.test import TestCase
-
-# Create your tests here.
->>>>>>> feature/US-09-FE-notification-center
