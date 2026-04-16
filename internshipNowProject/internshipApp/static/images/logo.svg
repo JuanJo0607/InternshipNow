@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">InternshipNow</title>
+  <rect width="120" height="120" rx="24" fill="#111827" />
+  <path d="M30 28 H90 L104 42 V78 L90 92 H30 L16 78 V42 Z" fill="#FFFFFF"/>
+  <path d="M46 42 H88 V78 L70 96 H46 V42 Z" fill="#111827"/>
+</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">InternshipNow</title>
+  <rect width="120" height="120" rx="24" fill="#111827" />
+  <path d="M28 28 H92 L108 44 V76 L92 92 H28 L12 76 V44 Z" fill="#FFFFFF" />
+  <path d="M48 34 H84 V68 L68 84 H48 V34 Z" fill="#111827" />
+  <path d="M68 84 L84 68 V56 H74 L68 62 V84 Z" fill="#FFFFFF" />
+</svg>

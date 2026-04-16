@@ -3,55 +3,61 @@
 {% block title %}{{ offer.title }}{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
-    <div class="flex items-center justify-between mb-6 gap-4 flex-wrap">
-        <div>
-            <h2 class="text-3xl font-bold mb-2">{{ offer.title }}</h2>
-            <p class="text-sm text-gray-500">{{ offer.company.company_name }}</p>
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="card p-8">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.3em] text-[#9CA3AF]">Oferta</p>
+                <h1 class="mt-3 text-3xl font-bold text-[#111827]">{{ offer.title }}</h1>
+                <p class="mt-2 text-[#6B7280]">{{ offer.company.company_name }}</p>
+            </div>
+            <a href="{% url 'student_offers' %}" class="btn-secondary">← Volver a ofertas</a>
         </div>
-        <div class="flex gap-3 flex-wrap">
-            <a href="{% url 'student_offers' %}" class="text-blue-500 hover:underline">← Back to Offers</a>
-            <a href="{% url 'student_applications' %}" class="text-green-500 hover:underline">My Applications</a>
+
+        <div class="mt-8 grid gap-4 md:grid-cols-3">
+            <div class="rounded-3xl border border-[#E5E7EB] bg-[#F9FAFB] p-5">
+                <p class="text-sm text-[#6B7280]">Ubicación</p>
+                <p class="mt-2 text-[#111827]">{{ offer.location }}</p>
+            </div>
+            <div class="rounded-3xl border border-[#E5E7EB] bg-[#F9FAFB] p-5">
+                <p class="text-sm text-[#6B7280]">Modalidad</p>
+                <p class="mt-2 text-[#111827]">{{ offer.get_modality_display }}</p>
+            </div>
+            <div class="rounded-3xl border border-[#E5E7EB] bg-[#F9FAFB] p-5">
+                <p class="text-sm text-[#6B7280]">Salario</p>
+                <p class="mt-2 text-[#111827]">{{ offer.salary }}</p>
+            </div>
         </div>
     </div>
 
-    <div class="grid gap-4">
-        <div>
-            <p class="text-gray-700"><strong>Location:</strong> {{ offer.location }}</p>
-            <p class="text-gray-700"><strong>Salary:</strong> {{ offer.salary }}</p>
-            <p class="text-gray-700"><strong>Modality:</strong> {{ offer.get_modality_display }}</p>
-            <p class="text-gray-700"><strong>Status:</strong> {{ offer.get_status_display }}</p>
-            {% if offer.closed_at %}
-                <p class="text-gray-700"><strong>Closed at:</strong> {{ offer.closed_at|date:'Y-m-d' }}</p>
-            {% endif %}
+    <div class="grid gap-6 lg:grid-cols-3">
+        <div class="card p-6 lg:col-span-2 space-y-6">
+            <section>
+                <h2 class="text-xl font-semibold text-[#111827]">Descripción</h2>
+                <p class="mt-3 text-[#6B7280]">{{ offer.description }}</p>
+            </section>
+            <section>
+                <h2 class="text-xl font-semibold text-[#111827]">Requisitos</h2>
+                <p class="mt-3 text-[#6B7280]">{{ offer.requirements }}</p>
+            </section>
+            <section>
+                <h2 class="text-xl font-semibold text-[#111827]">Habilidades deseadas</h2>
+                <p class="mt-3 text-[#6B7280]">{{ offer.desired_skills }}</p>
+            </section>
         </div>
-
-        <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-xl font-semibold mb-2">Description</h3>
-            <p class="text-gray-800">{{ offer.description }}</p>
-        </div>
-
-        <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-xl font-semibold mb-2">Requirements</h3>
-            <p class="text-gray-800">{{ offer.requirements }}</p>
-        </div>
-
-        <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-xl font-semibold mb-2">Desired Skills</h3>
-            <p class="text-gray-800">{{ offer.desired_skills }}</p>
-        </div>
-
-        <div class="mt-4">
-            {% if applied %}
-                <span class="inline-flex items-center rounded-full bg-green-100 text-green-800 px-4 py-2 font-semibold">
-                    You have already applied to this offer.
-                </span>
-            {% else %}
-                <a href="{% url 'apply_to_offer' offer.id %}" class="bg-blue-600 text-white px-5 py-3 rounded-lg hover:bg-blue-700">
-                    Apply Now
-                </a>
-            {% endif %}
-        </div>
+        <aside class="card p-6 space-y-4">
+            <div class="rounded-2xl bg-[#F9FAFB] p-4">
+                <p class="text-sm text-[#6B7280]">Estado de aplicación</p>
+                <p class="mt-2 text-[#111827]">{{ offer.get_status_display }}</p>
+            </div>
+            <div>
+                {% if applied %}
+                    <span class="badge badge-success">Ya aplicaste</span>
+                {% else %}
+                    <a href="{% url 'apply_to_offer' offer.id %}" class="btn-primary w-full text-center">Aplicar ahora</a>
+                {% endif %}
+            </div>
+        </aside>
     </div>
 </div>
 {% endblock %}

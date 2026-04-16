@@ -1,199 +1,159 @@
 {% extends 'base.html' %}
-{% block title %}Student Profile{% endblock %}
+
+{% block title %}Perfil estudiante{% endblock %}
+
 {% block content %}
-<div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
-    <h2 class="text-2xl font-bold mb-6">Student Profile</h2>
-
-    {% if profile.is_verified %}
-        <span class="inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full mb-4">
-             Estudiante Verificado
-        </span>
-    {% else %}
-        <span class="inline-block bg-yellow-100 text-yellow-800 text-sm font-semibold px-3 py-1 rounded-full mb-4">
-            ⏳ Pendiente de verificación
-        </span>
-    {% endif %}
-
-    {% if not profile.skills %}
-        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded mb-4 text-sm">
-             You haven't added any skills to your profile yet.
-            <a href="{% url 'matching_offers' %}" class="underline font-semibold">View suggested offers</a>
-            based on your career while you complete your profile.
-        </div>
-    {% endif %}
-
-    <form method="post" class="space-y-4" id="profile-form">
-        {% csrf_token %}
-
-        {% for field in form %}
-            {% if field.name == 'skills' %}
-                <div class="flex flex-col">
-                    <label class="mb-1 font-semibold text-gray-700">Skills</label>
-                    <input type="hidden" name="skills" id="skills-hidden" value="{{ profile.skills }}">
-                    <div id="skills-container"
-                         class="flex flex-wrap gap-2 p-2 border rounded min-h-[44px] cursor-text focus-within:ring-2 focus-within:ring-blue-400">
-                    </div>
-                    <div class="relative mt-2">
-                        <input
-                            type="text"
-                            id="skills-input"
-                            placeholder="Type to search and add a skill..."
-                            autocomplete="off"
-                            class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        >
-                        <ul id="skills-dropdown"
-                            class="absolute z-10 w-full bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-y-auto hidden">
-                        </ul>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-1">Type to search from the list. Use ↑↓ to navigate, Enter to add, ✕ to remove.</p>
-                </div>
-            {% else %}
-                <div class="flex flex-col">
-                    <label class="mb-1 font-semibold text-gray-700">{{ field.label }}</label>
-                    {{ field }}
-                </div>
-            {% endif %}
-        {% endfor %}
-
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            Save
-        </button>
-    </form>
-
-    <!-- LOGOUT -->
-    <form action="{% url 'logout' %}" method="POST" class="mt-4">
-    <div class="mt-6">
-        <a href="{% url 'student_offers' %}" class="text-blue-500 hover:underline">View all internship offers</a>
-    </div>
-
-    <!-- US-10: Sección CV -->
-    <div class="mt-8 border-t pt-6">
-        <h3 class="text-lg font-bold mb-3 text-gray-800">Curriculum Vitae (CV)</h3>
-        {% if profile.cv_pdf %}
-            <div class="flex items-center gap-3 mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <span class="text-green-600 text-xl">📄</span>
-                <a href="{{ profile.cv_pdf.url }}" target="_blank"
-                   class="text-blue-600 underline text-sm hover:text-blue-800">View current CV</a>
+<div class="max-w-6xl mx-auto space-y-8">
+    <section class="card p-8">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <p class="section-label">Perfil</p>
+                <h1 class="mt-4 text-3xl font-bold text-[#111827]">Mi perfil estudiantil</h1>
+                <p class="mt-3 text-[#6B7280]">Completa tu perfil para que las empresas te encuentren con mayor precisión.</p>
             </div>
-        {% else %}
-            <p class="text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
-                You haven't uploaded a CV yet.
-            </p>
-        {% endif %}
-        <a href="{% url 'upload_cv' %}"
-           class="inline-block bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 text-sm">
-            {% if profile.cv_pdf %}Replace CV{% else %}Upload CV{% endif %}
-        </a>
-    </div>
+            <a href="{% url 'student_offers' %}" class="btn-secondary">Ver vacantes</a>
+        </div>
+    </section>
 
-    <!-- LOGOUT -->
-    <form action="{% url 'logout' %}" method="POST" class="mt-6">
-        {% csrf_token %}
-        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
-    </form>
+    <div class="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
+        <section class="card p-8">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                {% for field in form %}
+                    {% if field.name == 'skills' %}
+                        <div class="flex flex-col gap-2">
+                            <label class="form-label">{{ field.label }}</label>
+                            <input type="hidden" name="skills" id="skills-hidden" value="{{ profile.skills }}">
+                            <div id="skills-container" class="min-h-[56px] flex flex-wrap gap-2 rounded-2xl border border-[#E5E7EB] bg-white p-3 cursor-text"></div>
+                            <div class="relative">
+                                <input id="skills-input" type="text" placeholder="Agrega una habilidad" autocomplete="off" class="input-field" />
+                                <ul id="skills-dropdown" class="absolute z-10 w-full bg-white border border-[#E5E7EB] rounded-2xl shadow-lg max-h-48 overflow-y-auto hidden"></ul>
+                            </div>
+                            <p class="text-sm text-[#6B7280]">Añade habilidades para mejorar tu match con las ofertas.</p>
+                        </div>
+                    {% else %}
+                        <div class="flex flex-col gap-2">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                <button type="submit" class="btn-primary">Guardar perfil</button>
+            </form>
+        </section>
+
+        <aside class="space-y-6">
+            <section class="card p-6">
+                <h2 class="text-xl font-semibold text-[#111827]">Estado del perfil</h2>
+                {% if profile.is_verified %}
+                    <span class="badge badge-success mt-4 inline-flex">Estudiante verificado</span>
+                {% else %}
+                    <span class="badge badge-warning mt-4 inline-flex">Pendiente de verificación</span>
+                {% endif %}
+            </section>
+
+            <section class="card p-6">
+                <h2 class="text-xl font-semibold text-[#111827]">Currículum</h2>
+                <div class="mt-4 space-y-3">
+                    {% if profile.cv_pdf %}
+                        <div class="rounded-2xl border border-[#E5E7EB] bg-[#F9FAFB] p-4">
+                            <p class="text-sm text-[#6B7280]">CV registrado</p>
+                            <a href="{{ profile.cv_pdf.url }}" target="_blank" class="mt-2 block font-semibold text-[#111827] underline">Ver documento</a>
+                        </div>
+                        <a href="{% url 'upload_cv' %}" class="btn-secondary">Reemplazar CV</a>
+                    {% else %}
+                        <p class="text-sm text-[#6B7280]">Aún no has subido tu CV.</p>
+                        <a href="{% url 'upload_cv' %}" class="btn-primary">Subir CV</a>
+                    {% endif %}
+                </div>
+            </section>
+        </aside>
+    </div>
 </div>
 
 <script>
-const SKILLS_LIST = [
+const STUDENT_SKILLS = [
   "Python","Java","JavaScript","TypeScript","C","C++","C#","Go","Rust","Swift","Kotlin","Ruby","PHP","Scala","R","MATLAB","Perl","Haskell","Dart","Lua","Shell Scripting","Bash","PowerShell",
   "HTML","CSS","React.js","Angular","Vue.js","Next.js","Nuxt.js","Svelte","jQuery","Bootstrap","Tailwind CSS","Sass","LESS","Webpack","Vite","Responsive Design","Web Accessibility","Progressive Web Apps",
   "Django","Flask","FastAPI","Node.js","Express.js","Spring Boot","Laravel","Ruby on Rails","ASP.NET","NestJS","GraphQL","REST APIs","SOAP","gRPC","WebSockets","OAuth","JWT",
   "React Native","Flutter","Android Development","iOS Development","Xamarin","Ionic","Expo",
   "SQL","MySQL","PostgreSQL","SQLite","Microsoft SQL Server","Oracle Database","MongoDB","Redis","Cassandra","Firebase","DynamoDB","Elasticsearch","Neo4j","MariaDB","CouchDB",
   "AWS","Google Cloud Platform","Microsoft Azure","Docker","Kubernetes","Terraform","Ansible","Jenkins","GitHub Actions","GitLab CI/CD","CI/CD","Linux","Nginx","Apache","Heroku","Vercel","Netlify","CloudFormation","Serverless","Microservices",
-  "Machine Learning","Deep Learning","Natural Language Processing","Computer Vision","TensorFlow","PyTorch","Keras","Scikit-learn","Pandas","NumPy","Matplotlib","Seaborn","Jupyter Notebooks","Data Analysis","Data Visualization","Data Wrangling","Feature Engineering","Statistical Modeling","A/B Testing","Time Series Analysis","Reinforcement Learning","Generative AI","Large Language Models","Hugging Face","OpenCV","NLTK","SpaCy",
-  "Apache Spark","Apache Kafka","Apache Airflow","Hadoop","ETL Pipelines","Data Warehousing","Data Modeling","dbt","Snowflake","BigQuery","Power BI","Tableau","Looker","Metabase",
-  "Git","GitHub","GitLab","Bitbucket","Code Review","Pair Programming",
-  "Object-Oriented Programming","Functional Programming","Design Patterns","Clean Code","SOLID Principles","Microservices Architecture","Event-Driven Architecture","Domain-Driven Design","Test-Driven Development","Behavior-Driven Development","Refactoring","API Design",
-  "Unit Testing","Integration Testing","End-to-End Testing","Selenium","Cypress","Jest","Pytest","JUnit","Postman","Load Testing","Performance Testing","Test Automation","Quality Assurance",
-  "Cybersecurity","Penetration Testing","Ethical Hacking","OWASP","Cryptography","Network Security","Firewalls","VPN","SSL/TLS","Identity and Access Management","SIEM","Vulnerability Assessment","Security Auditing","Networking","TCP/IP","DNS","HTTP/HTTPS",
-  "UI Design","UX Design","UI/UX Design","Figma","Adobe XD","Sketch","Wireframing","Prototyping","User Research","Usability Testing","Information Architecture","Interaction Design","Design Systems","Adobe Photoshop","Adobe Illustrator","Canva",
-  "Agile","Scrum","Kanban","SAFe","Lean","Waterfall","Project Management","Product Management","Jira","Trello","Asana","Confluence","Sprint Planning","Backlog Management","Stakeholder Management",
-  "Technical Writing","Documentation","Public Speaking","Teamwork","Problem Solving","Critical Thinking","Time Management","Leadership","Communication","Adaptability","Mentoring",
-  "Operating Systems","Distributed Systems","System Design","High Availability","Scalability","Load Balancing","Caching","Message Queues","RabbitMQ","Celery",
-  "Blockchain","Smart Contracts","Solidity","Web3","IoT","Augmented Reality","Virtual Reality","Edge Computing","Quantum Computing",
-  "SAP","Salesforce","Microsoft Office","Excel","Power Automate","SharePoint","Dynamics 365"
+  "Machine Learning","Deep Learning","Natural Language Processing","Computer Vision","TensorFlow","PyTorch","Keras","Scikit-learn","Pandas","NumPy","Matplotlib","Seaborn","Jupyter Notebooks","Data Analysis","Data Visualization","Data Wrangling","Feature Engineering","Statistical Modeling","A/B Testing","Time Series Analysis","Reinforcement Learning","Generative AI","Large Language Models","Hugging Face","OpenCV","NLTK","SpaCy"
 ];
 
-const container   = document.getElementById('skills-container');
-const input       = document.getElementById('skills-input');
-const hiddenInput = document.getElementById('skills-hidden');
-const dropdown    = document.getElementById('skills-dropdown');
-let tags = hiddenInput.value ? hiddenInput.value.split(',').map(s => s.trim()).filter(Boolean) : [];
-let highlightedIndex = -1;
+const profileSkillsContainer = document.getElementById('skills-container');
+const profileSkillsInput = document.getElementById('skills-input');
+const profileSkillsHidden = document.getElementById('skills-hidden');
+const profileSkillsDropdown = document.getElementById('skills-dropdown');
+let profileSkillsTags = profileSkillsHidden.value ? profileSkillsHidden.value.split(',').map(s => s.trim()).filter(Boolean) : [];
+let profileSkillsHighlight = -1;
 
-function renderTags() {
-    container.innerHTML = '';
-    tags.forEach((tag, index) => {
+function renderProfileSkillTags() {
+    profileSkillsContainer.innerHTML = '';
+    profileSkillsTags.forEach((tag, index) => {
         const pill = document.createElement('span');
-        pill.className = 'flex items-center gap-1 bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full';
-        pill.innerHTML = `${tag}<button type="button" onclick="removeTag(${index})" class="ml-1 text-blue-500 hover:text-red-500 font-bold leading-none">✕</button>`;
-        container.appendChild(pill);
+        pill.className = 'inline-flex items-center gap-2 rounded-full bg-[#F3F4F6] px-3 py-1 text-sm text-[#374151]';
+        pill.innerHTML = `${tag}<button type="button" onclick="removeProfileSkill(${index})" class="text-[#374151]/80 hover:text-[#000000]">✕</button>`;
+        profileSkillsContainer.appendChild(pill);
     });
-    hiddenInput.value = tags.join(', ');
+    profileSkillsHidden.value = profileSkillsTags.join(', ');
 }
 
-function addTag(value) {
+function addProfileSkill(value) {
     const skill = value.trim();
     if (!skill) return;
-    const match = SKILLS_LIST.find(s => s.toLowerCase() === skill.toLowerCase());
-    if (!match) {
-        input.classList.add('border-red-400');
-        setTimeout(() => input.classList.remove('border-red-400'), 1000);
-        return;
+    const match = STUDENT_SKILLS.find(s => s.toLowerCase() === skill.toLowerCase());
+    if (!match) return;
+    if (!profileSkillsTags.map(s => s.toLowerCase()).includes(match.toLowerCase())) {
+        profileSkillsTags.push(match);
+        renderProfileSkillTags();
     }
-    if (!tags.map(t => t.toLowerCase()).includes(match.toLowerCase())) {
-        tags.push(match);
-        renderTags();
-    }
-    input.value = '';
-    hideDropdown();
+    profileSkillsInput.value = '';
+    hideProfileSkillsDropdown();
 }
 
-function removeTag(index) {
-    tags.splice(index, 1);
-    renderTags();
+function removeProfileSkill(index) {
+    profileSkillsTags.splice(index, 1);
+    renderProfileSkillTags();
 }
 
-function showDropdown(query) {
-    const filtered = SKILLS_LIST.filter(s =>
-        s.toLowerCase().includes(query.toLowerCase()) &&
-        !tags.map(t => t.toLowerCase()).includes(s.toLowerCase())
-    ).slice(0, 8);
-    if (!filtered.length || !query) { hideDropdown(); return; }
-    highlightedIndex = -1;
-    dropdown.innerHTML = '';
+function showProfileSkillsDropdown(query) {
+    const filtered = STUDENT_SKILLS.filter(s => s.toLowerCase().includes(query.toLowerCase()) && !profileSkillsTags.map(t => t.toLowerCase()).includes(s.toLowerCase())).slice(0, 8);
+    if (!filtered.length || !query) { hideProfileSkillsDropdown(); return; }
+    profileSkillsHighlight = -1;
+    profileSkillsDropdown.innerHTML = '';
     filtered.forEach(skill => {
         const li = document.createElement('li');
-        li.className = 'px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm text-gray-700';
+        li.className = 'px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] text-sm text-[#374151]';
         li.textContent = skill;
-        li.addEventListener('mousedown', e => { e.preventDefault(); addTag(skill); });
-        dropdown.appendChild(li);
+        li.addEventListener('mousedown', e => { e.preventDefault(); addProfileSkill(skill); });
+        profileSkillsDropdown.appendChild(li);
     });
-    dropdown.classList.remove('hidden');
+    profileSkillsDropdown.classList.remove('hidden');
 }
 
-function hideDropdown() {
-    dropdown.classList.add('hidden');
-    highlightedIndex = -1;
+function hideProfileSkillsDropdown() {
+    profileSkillsDropdown.classList.add('hidden');
+    profileSkillsHighlight = -1;
 }
 
-function updateHighlight() {
-    [...dropdown.querySelectorAll('li')].forEach((li, i) => {
-        li.classList.toggle('bg-blue-100', i === highlightedIndex);
+function updateProfileSkillsHighlight() {
+    [...profileSkillsDropdown.querySelectorAll('li')].forEach((li, i) => {
+        li.classList.toggle('bg-[#E5E7EB]', i === profileSkillsHighlight);
     });
 }
 
-input.addEventListener('input', function() { showDropdown(this.value); });
-input.addEventListener('keydown', function(e) {
-    const items = [...dropdown.querySelectorAll('li')];
-    if (e.key === 'ArrowDown') { e.preventDefault(); highlightedIndex = Math.min(highlightedIndex + 1, items.length - 1); updateHighlight(); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); highlightedIndex = Math.max(highlightedIndex - 1, 0); updateHighlight(); }
-    else if (e.key === 'Enter') { e.preventDefault(); highlightedIndex >= 0 && items[highlightedIndex] ? addTag(items[highlightedIndex].textContent) : addTag(this.value); }
-    else if (e.key === 'Escape') { hideDropdown(); }
+profileSkillsInput.addEventListener('input', function() { showProfileSkillsDropdown(this.value); });
+profileSkillsInput.addEventListener('keydown', function(e) {
+    const items = [...profileSkillsDropdown.querySelectorAll('li')];
+    if (e.key === 'ArrowDown') { e.preventDefault(); profileSkillsHighlight = Math.min(profileSkillsHighlight + 1, items.length - 1); updateProfileSkillsHighlight(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); profileSkillsHighlight = Math.max(profileSkillsHighlight - 1, 0); updateProfileSkillsHighlight(); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (profileSkillsHighlight >= 0 && items[profileSkillsHighlight]) { addProfileSkill(items[profileSkillsHighlight].textContent); } else { addProfileSkill(this.value); } }
+    else if (e.key === 'Escape') { hideProfileSkillsDropdown(); }
 });
-input.addEventListener('blur', () => setTimeout(hideDropdown, 150));
-container.addEventListener('click', () => input.focus());
-renderTags();
+profileSkillsInput.addEventListener('blur', () => setTimeout(hideProfileSkillsDropdown, 150));
+profileSkillsContainer.addEventListener('click', () => profileSkillsInput.focus());
+renderProfileSkillTags();
 </script>
 {% endblock %}

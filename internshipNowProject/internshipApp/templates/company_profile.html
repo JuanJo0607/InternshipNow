@@ -1,45 +1,35 @@
 {% extends 'base.html' %}
 
-{% block title %}Company Profile{% endblock %}
+{% block title %}Perfil de Empresa{% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
-
-    <h2 class="text-2xl font-bold mb-6">Company Profile</h2>
-
-    <!-- FORM SAVE -->
-    <form method="post" class="space-y-4">
-        {% csrf_token %}
-
-        {% for field in form %}
-            <div class="flex flex-col">
-                <label class="mb-1 font-semibold text-gray-700">
-                    {{ field.label }}
-                </label>
-
-                {{ field }}
+<div class="max-w-5xl mx-auto space-y-8">
+    <section class="card p-8">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+                <p class="section-label">Empresa</p>
+                <h1 class="mt-4 text-3xl font-bold text-[#111827]">Perfil de la empresa</h1>
+                <p class="mt-3 text-[#6B7280]">Actualiza los datos clave de tu empresa y gestiona tus vacantes de forma profesional.</p>
             </div>
-        {% endfor %}
+            <div class="flex flex-wrap gap-3">
+                <a href="{% url 'company_offers' %}" class="btn-secondary">Mis vacantes</a>
+                <a href="{% url 'company_applications' %}" class="btn-secondary">Postulaciones</a>
+                <a href="{% url 'company_metrics_page' profile.id %}" class="btn-secondary">Métricas</a>
+            </div>
+        </div>
+    </section>
 
-        <button type="submit"
-            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-            Save
-        </button>
-    </form>
-
-    <div class="mt-6">
-        <a href="{% url 'company_offers' %}" class="text-blue-500 hover:underline">Manage internship offers</a>
-    </div>
-
-    <!-- LOGOUT -->
-    <form action="{% url 'logout' %}" method="POST" class="mt-4">
-        {% csrf_token %}
-        <button type="submit"
-            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-            Logout
-        </button>
-    </form>
-
+    <section class="card p-8">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="flex flex-col gap-2">
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-primary">Guardar cambios</button>
+        </form>
+    </section>
 </div>
 {% endblock %}
-

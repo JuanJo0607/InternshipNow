@@ -1,202 +1,274 @@
 <!DOCTYPE html>
-<html>
+{% load static %}
+<html lang="es">
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}InternshipNow{% endblock %}</title>
 
-    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        input, textarea, select {
-            border: 1px solid #9ca3af;
-            border-radius: 8px;
-            padding: 8px;
-            width: 100%;
-            background-color: white;
-            outline: none;
+        :root {
+            --color-primary: #000000;
+            --color-primary-hover: #374151;
+            --color-bg-page: #F3F4F6;
+            --color-bg-card: #FFFFFF;
+            --color-border: #E5E7EB;
+            --color-text-primary: #000000;
+            --color-text-secondary: #6B7280;
+            --color-text-muted: #9CA3AF;
+            --color-muted-bg: #F9FAFB;
+            --color-surface: #FAFBFC;
+            --color-success: #166534;
+            --color-warning: #A16207;
         }
 
-        input:focus, textarea:focus, select:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--color-bg-page);
+            color: var(--color-text-primary);
         }
 
-        label {
+        a { color: inherit; }
+        a:hover { color: var(--color-primary-hover); }
+
+        .card {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 1rem;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+        }
+
+        .btn-primary,
+        button[type="submit"] {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-primary);
+            color: white;
+            border: 1px solid transparent;
+            border-radius: 0.75rem;
+            padding: 0.85rem 1.4rem;
+            font-weight: 700;
+            transition: background 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover { background: var(--color-primary-hover); }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            padding: 0.85rem 1.3rem;
             font-weight: 600;
-            display: block;
-            margin-bottom: 4px;
+            transition: background 0.2s ease;
+            text-decoration: none;
         }
 
-        form p {
-            margin-bottom: 12px;
+        .btn-secondary:hover { background: var(--color-muted-bg); }
+
+        .btn-soft {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-muted-bg);
+            color: var(--color-text-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.2rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #B91C1C;
+            background: transparent;
+            border: 1px solid #FCA5A5;
+            padding: 0.75rem 1.2rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .input-field,
+        input,
+        textarea,
+        select {
+            width: 100%;
+            border: 1px solid var(--color-border);
+            border-radius: 0.85rem;
+            padding: 0.95rem 1rem;
+            background: white;
+            color: var(--color-text-primary);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .input-field:focus,
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--color-primary-hover);
+            box-shadow: 0 0 0 4px rgba(55, 65, 81, 0.08);
+        }
+
+        label,
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .section-label {
+            display: inline-flex;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            background: var(--color-muted-bg);
+            color: var(--color-text-secondary);
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .section-title {
+            font-size: clamp(1.75rem, 2.4vw, 3rem);
+            line-height: 1.05;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.45rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .badge-soft {
+            background: var(--color-muted-bg);
+            color: var(--color-text-secondary);
+        }
+
+        .badge-success {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .footer-minimal {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .logo-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 1rem;
+            /*background: #000; */
+        }
+
+        .logo-mark svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .text-muted {
+            color: var(--color-text-muted);
+        }
+
+        .card-hero {
+            background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(243,244,246,0.96));
         }
     </style>
 </head>
-
-<body class="bg-gray-100">
-
-    <header class="bg-white shadow-sm">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-            <a href="{% url 'home' %}" class="text-xl font-bold text-slate-900">InternshipNow</a>
-            {% if user.is_authenticated %}
-            <div class="relative">
-                <button id="notificationButton" type="button" onclick="toggleNotifications()" class="relative p-2 text-slate-700 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
-                    </svg>
-                    {% if unread_notification_count > 0 %}
-                    <span class="absolute -top-1 -right-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white">{{ unread_notification_count }}</span>
-                    {% endif %}
-                </button>
-
-                <div id="notificationDropdown" class="hidden absolute right-0 z-50 mt-2 w-96 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-                    <div class="border-b border-slate-200 px-4 py-3 bg-slate-50">
-                        <div class="flex items-center justify-between gap-4">
-                            <span class="font-semibold text-slate-800">Notificaciones</span>
-                            <form method="post" action="{% url 'mark_all_notifications_read' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="text-sm text-blue-600 hover:text-blue-800">Marcar todas como leídas</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="max-h-72 space-y-1 overflow-y-auto px-2 py-2">
-                        {% if notifications %}
-                            {% for notification in notifications %}
-                                <div class="rounded-xl px-4 py-3 {% if not notification.is_read %}bg-blue-50{% else %}bg-white{% endif %}">
-                                    <p class="font-semibold text-slate-900">{{ notification.title }}</p>
-                                    <p class="mt-1 text-sm text-slate-600">{{ notification.message }}</p>
-                                    <p class="mt-2 text-xs text-slate-500">{{ notification.created_at|date:"d M Y H:i" }}</p>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="rounded-xl px-4 py-6 text-center text-sm text-slate-500">
-                                No hay notificaciones recientes.
-                            </div>
-                        {% endif %}
-                    </div>
+<body class="min-h-screen bg-[#F3F4F6]">
+    <header class="bg-white border-b border-[#E5E7EB]">
+        <div class="container mx-auto flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between">
+            <a href="{% url 'home' %}" class="flex items-center gap-3 text-[#000000]">
+                <span class="logo-mark">
+                    <img src="{% static 'images/logo.svg' %}" alt="InternshipNow logo" class="h-12 w-12 object-contain" />
+                </span>
+                <div>
+                    <p class="text-lg font-semibold tracking-tight">InternshipNow</p>
+                    <p class="text-sm text-[#6B7280]">Talento real para oportunidades reales</p>
                 </div>
+            </a>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                {% if user.is_authenticated %}
+                    <span class="inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F3F4F6] px-3 py-2 text-sm font-medium text-[#000000]">
+                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#F3F4F6] text-[#000000]">👤</span>
+                        {{ user.role|default:"Usuario"|title }}
+                    </span>
+                    {% if user.role == 'company' %}
+                        <a href="{% url 'company_profile' %}" class="btn-secondary">Mi perfil</a>
+                    {% else %}
+                        <a href="{% url 'student_profile' %}" class="btn-secondary">Mi perfil</a>
+                    {% endif %}
+                    <form action="{% url 'logout' %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-secondary inline-flex items-center gap-2">
+                            Salir
+                            <span aria-hidden="true">→</span>
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-secondary">Ingresar</a>
+                    <a href="{% url 'register' %}" class="btn-primary">Regístrate</a>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </header>
 
-    <div class="container mx-auto mt-10">
-        {% block content %}
-        {% endblock %}
-    </div>
+    <main class="container mx-auto px-4 py-10">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="border-t border-[#E5E7EB] bg-white">
+        <div class="container mx-auto px-4 py-6 text-center footer-minimal">
+            <p class="font-semibold">InternshipNow</p>
+            <p class="mt-2">© {{ now|date:"Y" }} InternshipNow. Todos los derechos reservados.</p>
+        </div>
+    </footer>
 
     <script>
-        let notificationSocket = null;
-        
-        function initWebSocket() {
-            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-            const wsUrl = protocol + '://' + window.location.host + '/ws/notifications/';
-            
-            notificationSocket = new WebSocket(wsUrl);
-            
-            notificationSocket.onopen = function(e) {
-                console.log('WebSocket connection established');
-            };
-            
-            notificationSocket.onmessage = function(e) {
-                const data = JSON.parse(e.data);
-                
-                if (data.type === 'initial_count') {
-                    updateBadge(data.unread_count);
-                } else if (data.type === 'new_notification') {
-                    addNotificationToUI(data);
-                    updateBadge(data.unread_count);
-                    showBrowserNotification(data.title, data.message);
-                }
-            };
-            
-            notificationSocket.onclose = function(e) {
-                console.log('WebSocket connection closed, attempting to reconnect...');
-                setTimeout(initWebSocket, 3000);
-            };
-            
-            notificationSocket.onerror = function(e) {
-                console.error('WebSocket error:', e);
-            };
-        }
-        
-        function updateBadge(count) {
-            const badgeElement = document.querySelector('#notificationButton span');
-            if (count > 0) {
-                if (!badgeElement) {
-                    const newBadge = document.createElement('span');
-                    newBadge.className = 'absolute -top-1 -right-1 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white';
-                    newBadge.textContent = count;
-                    document.getElementById('notificationButton').appendChild(newBadge);
-                } else {
-                    badgeElement.textContent = count;
-                }
-            } else if (badgeElement) {
-                badgeElement.remove();
-            }
-        }
-        
         function addNotificationToUI(notification) {
             const container = document.querySelector('#notificationDropdown .max-h-72');
-            const emptyMessage = container.querySelector('.text-center');
-            
-            if (emptyMessage) {
-                emptyMessage.remove();
-            }
-            
+            if (!container) return;
             const notifElement = document.createElement('div');
-            notifElement.className = 'rounded-xl px-4 py-3 bg-blue-50';
+            notifElement.className = 'rounded-xl px-4 py-3 bg-[#F3F4F6] border border-[#E5E7EB]';
             notifElement.innerHTML = `
-                <p class="font-semibold text-slate-900">${notification.title}</p>
-                <p class="mt-1 text-sm text-slate-600">${notification.message}</p>
-                <p class="mt-2 text-xs text-slate-500">${new Date(notification.created_at).toLocaleString()}</p>
+                <p class="font-semibold text-[#111827]">${notification.title}</p>
+                <p class="mt-1 text-sm text-[#6B7280]">${notification.message}</p>
+                <p class="mt-2 text-xs text-[#9CA3AF]">${new Date(notification.created_at).toLocaleString()}</p>
             `;
-            
             container.insertBefore(notifElement, container.firstChild);
-            
-            const notifs = container.querySelectorAll('.rounded-xl');
-            if (notifs.length > 5) {
-                notifs[notifs.length - 1].remove();
-            }
         }
-        
-        function showBrowserNotification(title, message) {
-            if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, {
-                    body: message,
-                    icon: '/static/icon.png'
-                });
-            }
-        }
-        
-        function toggleNotifications() {
-            const dropdown = document.getElementById('notificationDropdown');
-            if (dropdown) dropdown.classList.toggle('hidden');
-        }
-
-        window.addEventListener('click', function(event) {
-            const button = document.getElementById('notificationButton');
-            const dropdown = document.getElementById('notificationDropdown');
-            if (!button || !dropdown) return;
-            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.classList.add('hidden');
-            }
-        });
-        
-        // Request browser notification permission
-        if ("Notification" in window && Notification.permission === "default") {
-            Notification.requestPermission();
-        }
-        
-        // Initialize WebSocket when page loads
-        {% if user.is_authenticated %}
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initWebSocket);
-        } else {
-            initWebSocket();
-        }
-        {% endif %}
     </script>
-
 </body>
 </html>

@@ -1,31 +1,68 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Home{% endblock %}
+
+{% block title %}InternshipNow{% endblock %}
 
 {% block content %}
-<div class="text-center">
+<div class="space-y-10">
+    <section class="card card-hero p-10 overflow-hidden">
+        <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+                <span class="section-label">Bienvenido</span>
+                <h1 class="mt-6 section-title font-bold text-[#111827]">InternshipNow</h1>
+                <p class="mt-5 max-w-2xl text-lg leading-8 text-[#6B7280]">
+                    Talento real para oportunidades reales en una experiencia limpia, clara y profesional. Simplifica la gestión de vacantes y recibe postulaciones en un solo lugar.
+                </p>
 
-    <h1 class="text-4xl font-bold mb-6">
-        Bienvenido a InternshipNow 
-    </h1>
+                <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <a href="{% url 'login' %}" class="btn-primary w-full sm:w-auto">Soy Estudiante</a>
+                    <a href="{% url 'login' %}" class="btn-secondary w-full sm:w-auto">Soy Empresa</a>
+                </div>
+            </div>
 
-    <p class="mb-6 text-gray-600">
-        Encuentra prácticas o publica oportunidades fácilmente
-    </p>
+            <div class="rounded-[1.5rem] border border-[#E5E7EB] bg-white p-8 shadow-sm">
+                <div class="mb-6 flex items-center gap-3">
+                    <span class="logo-mark"><img src="{% static 'images/logo.svg' %}" alt="InternshipNow logo" class="h-14 w-14 object-contain" /></span>
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.28em] text-[#9CA3AF]">InternshipNow</p>
+                        <p class="text-base font-semibold text-[#111827]">Tu hub de prácticas profesionales</p>
+                    </div>
+                </div>
 
-    <div class="space-x-4">
-        <a href="{% url 'login' %}">
-            <button class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
-                Login
-            </button>
-        </a>
+                <div class="grid gap-4">
+                    <div class="rounded-3xl border border-[#E5E7EB] bg-[#F9FAFB] p-5">
+                        <p class="text-sm text-[#6B7280]">Empresas y estudiantes en un mismo lugar.</p>
+                    </div>
+                    <div class="rounded-3xl border border-[#E5E7EB] bg-[#F9FAFB] p-5">
+                        <p class="text-sm text-[#6B7280]">Publica vacantes, revisa candidaturas y mantén el proceso transparente.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <a href="{% url 'register' %}">
-            <button class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
-                Register
-            </button>
-        </a>
-    </div>
-
+    <section class="grid gap-6 lg:grid-cols-2">
+        <article class="card p-8">
+            <span class="section-label">Para Estudiantes</span>
+            <h2 class="mt-4 text-2xl font-semibold text-[#111827]">Encuentra prácticas relevantes rápidamente</h2>
+            <p class="mt-4 text-[#6B7280]">Explora ofertas filtradas por ubicación, modalidad y habilidades. Gestiona tus postulaciones sin distracciones.</p>
+            <ul class="mt-6 space-y-3 text-[#6B7280]">
+                <li>• Comparte tu CV y perfil profesional.</li>
+                <li>• Aplica con un clic.</li>
+                <li>• Sigue el estado de cada vacante.</li>
+            </ul>
+        </article>
+        <article class="card p-8">
+            <span class="section-label">Para Empresas</span>
+            <h2 class="mt-4 text-2xl font-semibold text-[#111827]">Publica vacantes y atrae talento</h2>
+            <p class="mt-4 text-[#6B7280]">Crea ofertas claras, recibe postulaciones ordenadas y mantén un dashboard con métricas de impacto.</p>
+            <ul class="mt-6 space-y-3 text-[#6B7280]">
+                <li>• Publica ofertas profesionales.</li>
+                <li>• Administra candidaturas fácilmente.</li>
+                <li>• Visualiza el progreso de cada vacante.</li>
+            </ul>
+        </article>
+    </section>
 </div>
 {% endblock %}

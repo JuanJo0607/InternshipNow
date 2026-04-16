@@ -1,269 +1,157 @@
 {% extends 'base.html' %}
 
-{% block title %}Company Analytics Dashboard{% endblock %}
+{% block title %}Métricas de empresa{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+<div class="max-w-7xl mx-auto space-y-8">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-            <h1 class="text-3xl font-bold">Analytics Dashboard</h1>
-            <p class="text-gray-600 mt-1">Insights for {{ company.company_name }}.</p>
+            <p class="section-label">Métricas</p>
+            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Dashboard de {{ company.company_name }}</h1>
+            <p class="mt-2 text-[#6B7280]">Monitorea el rendimiento de tus ofertas y recibe datos claros para tomar decisiones.</p>
         </div>
-        <div class="flex gap-3 flex-wrap">
-            <a href="{% url 'company_offers' %}" class="bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200">Back to Offers</a>
-            <a href="{% url 'company_profile' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Company Profile</a>
+        <a href="{% url 'company_profile' %}" class="btn-secondary">Volver al perfil</a>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-3">
+        <div class="card p-6">
+            <p class="text-sm text-[#6B7280]">Total de vistas</p>
+            <p class="text-3xl font-bold mt-3" id="summaryTotalViews">0</p>
+        </div>
+        <div class="card p-6">
+            <p class="text-sm text-[#6B7280]">Total de postulaciones</p>
+            <p class="text-3xl font-bold mt-3" id="summaryTotalApplications">0</p>
+        </div>
+        <div class="card p-6">
+            <p class="text-sm text-[#6B7280]">Días promedio para cerrar</p>
+            <p class="text-3xl font-bold mt-3" id="summaryAverageClose">0.0</p>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-slate-50 p-4 rounded-xl shadow-sm">
-            <label class="block text-sm font-semibold text-gray-700 mb-2" for="monthSelect">Month</label>
-            <select id="monthSelect" class="w-full border border-gray-300 rounded px-3 py-2">
-                <option value="">All months</option>
-                <option value="1">Jan</option>
-                <option value="2">Feb</option>
-                <option value="3">Mar</option>
-                <option value="4">Apr</option>
-                <option value="5">May</option>
-                <option value="6">Jun</option>
-                <option value="7">Jul</option>
-                <option value="8">Aug</option>
-                <option value="9">Sep</option>
-                <option value="10">Oct</option>
-                <option value="11">Nov</option>
-                <option value="12">Dec</option>
-            </select>
+    <div class="grid gap-6 lg:grid-cols-2">
+        <div class="card p-6">
+            <h2 class="text-xl font-semibold text-[#111827]">Vistas vs postulaciones</h2>
+            <p class="mt-2 text-[#6B7280]">Comparativa por oferta.</p>
+            <div class="mt-6 h-80">
+                <canvas id="viewsApplicationsChart" width="400" height="300"></canvas>
+            </div>
         </div>
-        <div class="bg-slate-50 p-4 rounded-xl shadow-sm">
-            <label class="block text-sm font-semibold text-gray-700 mb-2" for="yearSelect">Year</label>
-            <select id="yearSelect" class="w-full border border-gray-300 rounded px-3 py-2">
-                <option value="">All years</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2026" selected>2026</option>
-            </select>
+        <div class="card p-6">
+            <h2 class="text-xl font-semibold text-[#111827]">Candidatos por estado</h2>
+            <p class="mt-2 text-[#6B7280]">Estado general de las aplicaciones.</p>
+            <div class="mt-6 h-80">
+                <canvas id="candidatesStatusChart" width="400" height="300"></canvas>
+            </div>
         </div>
-        <div class="bg-slate-50 p-4 rounded-xl shadow-sm flex flex-col justify-between">
+    </div>
+
+    <div class="card p-6 bg-[#F9FAFB] border-[#E5E7EB]">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-                <p class="text-sm uppercase tracking-wide text-gray-500">Current filter</p>
-                <p class="mt-3 text-lg font-semibold" id="filterLabel">All time</p>
+                <p class="text-sm text-[#6B7280]">Filtrar métricas</p>
+                <p class="text-sm text-[#9CA3AF]">Selecciona mes y año para ajustar los datos.</p>
             </div>
-            <button id="refreshButton" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Refresh</button>
-        </div>
-    </div>
-
-    <div id="loadingState" class="rounded-xl bg-blue-50 border border-blue-100 p-6 text-center text-blue-700">Loading analytics...</div>
-    <div id="emptyState" class="hidden rounded-xl bg-yellow-50 border border-yellow-200 p-6 text-center text-yellow-800">
-        No metrics available for the selected period.
-    </div>
-
-    <div id="dashboardContent" class="hidden space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
-                <p class="text-sm text-gray-500">Total Views</p>
-                <p id="summaryTotalViews" class="text-3xl font-bold mt-3">0</p>
-            </div>
-            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
-                <p class="text-sm text-gray-500">Total Applications</p>
-                <p id="summaryTotalApplications" class="text-3xl font-bold mt-3">0</p>
-            </div>
-            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
-                <p class="text-sm text-gray-500">Avg. Days to Close</p>
-                <p id="summaryAverageClose" class="text-3xl font-bold mt-3">0.0</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 class="text-xl font-semibold">Views vs Applications</h2>
-                        <p class="text-sm text-gray-500">Por vacante</p>
-                    </div>
-                </div>
-                <div class="w-full">
-                    <canvas id="viewsApplicationsChart" width="400" height="300"></canvas>
-                </div>
-            </div>
-            <div class="bg-slate-50 p-6 rounded-xl shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 class="text-xl font-semibold">Candidates by Status</h2>
-                        <p class="text-sm text-gray-500">Distribución por estado</p>
-                    </div>
-                </div>
-                <div class="w-full">
-                    <canvas id="candidatesStatusChart" width="400" height="300"></canvas>
-                </div>
+            <div class="flex flex-wrap gap-3 items-center">
+                <select id="monthSelect" class="input-field max-w-[10rem]">
+                    <option value="">Todo el año</option>
+                    <option value="1">Ene</option>
+                    <option value="2">Feb</option>
+                    <option value="3">Mar</option>
+                    <option value="4">Abr</option>
+                    <option value="5">May</option>
+                    <option value="6">Jun</option>
+                    <option value="7">Jul</option>
+                    <option value="8">Ago</option>
+                    <option value="9">Sep</option>
+                    <option value="10">Oct</option>
+                    <option value="11">Nov</option>
+                    <option value="12">Dic</option>
+                </select>
+                <select id="yearSelect" class="input-field max-w-[10rem]">
+                    <option value="">Todos los años</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                </select>
+                <button id="refreshButton" class="btn-primary">Actualizar</button>
             </div>
         </div>
     </div>
+
+    <div id="loadingState" class="rounded-xl border border-[#E5E7EB] bg-[#F3F4F6] p-6 text-center text-[#6B7280]">Cargando métricas...</div>
+    <div id="emptyState" class="hidden rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-6 text-center text-[#6B7280]">No hay métricas para el periodo seleccionado.</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const companyId = {{ company.id }};
 const metricsUrl = '{% url "company_metrics_api" company.id %}';
 const monthSelect = document.getElementById('monthSelect');
 const yearSelect = document.getElementById('yearSelect');
 const refreshButton = document.getElementById('refreshButton');
 const loadingState = document.getElementById('loadingState');
 const emptyState = document.getElementById('emptyState');
-const dashboardContent = document.getElementById('dashboardContent');
-const filterLabel = document.getElementById('filterLabel');
-const summaryTotalViews = document.getElementById('summaryTotalViews');
-const summaryTotalApplications = document.getElementById('summaryTotalApplications');
-const summaryAverageClose = document.getElementById('summaryAverageClose');
-
 let viewsApplicationsChart = null;
 let candidatesStatusChart = null;
-
-function buildFilterLabel(month, year) {
-    if (month && year) {
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return `${monthNames[month - 1]} ${year}`;
-    }
-    if (year) {
-        return year;
-    }
-    return 'All time';
-}
 
 function showLoading() {
     loadingState.classList.remove('hidden');
     emptyState.classList.add('hidden');
-    dashboardContent.classList.add('hidden');
 }
 
 function showEmpty() {
     loadingState.classList.add('hidden');
     emptyState.classList.remove('hidden');
-    dashboardContent.classList.add('hidden');
 }
 
-function showDashboard() {
-    loadingState.classList.add('hidden');
-    emptyState.classList.add('hidden');
-    dashboardContent.classList.remove('hidden');
-}
-
-function createChart(context, config) {
-    if (context.chart) {
-        context.chart.destroy();
-    }
-    return new Chart(context, config);
-}
-
-function renderCharts(data) {
-    const labels = data.views_vs_applications.map(item => item.title);
-    const viewsData = data.views_vs_applications.map(item => item.views_count);
-    const applicationsData = data.views_vs_applications.map(item => item.applications_count);
-    const statusLabels = data.candidates_by_status.map(item => item.label);
-    const statusCounts = data.candidates_by_status.map(item => item.count);
+function updateData(data) {
+    document.getElementById('summaryTotalViews').textContent = data.totals.total_views;
+    document.getElementById('summaryTotalApplications').textContent = data.totals.total_applications;
+    document.getElementById('summaryAverageClose').textContent = data.totals.average_time_to_close_days.toFixed(1);
 
     const viewsCtx = document.getElementById('viewsApplicationsChart').getContext('2d');
     const statusCtx = document.getElementById('candidatesStatusChart').getContext('2d');
 
-    if (viewsApplicationsChart) {
-        viewsApplicationsChart.destroy();
-    }
-    if (candidatesStatusChart) {
-        candidatesStatusChart.destroy();
-    }
+    if (viewsApplicationsChart) viewsApplicationsChart.destroy();
+    if (candidatesStatusChart) candidatesStatusChart.destroy();
 
     viewsApplicationsChart = new Chart(viewsCtx, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels: data.views_vs_applications.map(item => item.title),
             datasets: [
-                {
-                    label: 'Views',
-                    data: viewsData,
-                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                },
-                {
-                    label: 'Applications',
-                    data: applicationsData,
-                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
-                }
+                { label: 'Vistas', data: data.views_vs_applications.map(item => item.views_count), backgroundColor: 'rgba(0,0,0,0.7)' },
+                { label: 'Postulaciones', data: data.views_vs_applications.map(item => item.applications_count), backgroundColor: 'rgba(107,114,128,0.7)' }
             ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { stacked: false },
-                y: { beginAtZero: true }
-            }
-        }
+        options: { responsive: true, maintainAspectRatio: false }
     });
 
     candidatesStatusChart = new Chart(statusCtx, {
         type: 'doughnut',
         data: {
-            labels: statusLabels,
-            datasets: [{
-                data: statusCounts,
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.8)',
-                    'rgba(16, 185, 129, 0.8)',
-                    'rgba(234, 88, 12, 0.8)',
-                ],
-                borderColor: '#fff',
-                borderWidth: 2,
-            }]
+            labels: data.candidates_by_status.map(item => item.label),
+            datasets: [{ data: data.candidates_by_status.map(item => item.count), backgroundColor: ['rgba(0,0,0,0.75)', 'rgba(107,114,128,0.75)', 'rgba(156,163,175,0.75)'] }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' }
-            }
-        }
+        options: { responsive: true, maintainAspectRatio: false }
     });
 }
 
-async function loadMetrics() {
+async function refreshMetrics() {
     showLoading();
-    const month = monthSelect.value;
-    const year = yearSelect.value;
     const params = new URLSearchParams();
-    if (month) params.append('month', month);
-    if (year) params.append('year', year);
-
-    filterLabel.textContent = buildFilterLabel(month ? parseInt(month) : null, year ? parseInt(year) : null);
-
-    try {
-        const response = await fetch(`${metricsUrl}?${params.toString()}`);
-        if (!response.ok) {
-            throw new Error('Failed to load metrics');
-        }
-        const data = await response.json();
-
-        if (!data.views_vs_applications.length && data.candidates_by_status.every(item => item.count === 0)) {
-            showEmpty();
-            return;
-        }
-
-        summaryTotalViews.textContent = data.totals.total_views;
-        summaryTotalApplications.textContent = data.totals.total_applications;
-        summaryAverageClose.textContent = data.totals.average_time_to_close_days.toFixed(1);
-
-        renderCharts(data);
-        showDashboard();
-    } catch (error) {
-        emptyState.textContent = 'Unable to load analytics. Please try again later.';
+    if (monthSelect.value) params.set('month', monthSelect.value);
+    if (yearSelect.value) params.set('year', yearSelect.value);
+    const response = await fetch(metricsUrl + '?' + params.toString());
+    const data = await response.json();
+    if (data.error || !data.views_vs_applications.length) {
         showEmpty();
-        console.error(error);
+        return;
     }
+    loadingState.classList.add('hidden');
+    updateData(data);
 }
 
-refreshButton.addEventListener('click', event => {
-    event.preventDefault();
-    loadMetrics();
-});
-
-loadMetrics();
+refreshButton.addEventListener('click', function() { refreshMetrics(); });
+refreshMetrics();
 </script>
-
 {% endblock %}

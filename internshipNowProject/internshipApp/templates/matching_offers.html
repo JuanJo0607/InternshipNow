@@ -1,131 +1,49 @@
 {% extends 'base.html' %}
 
-{% block title %}My Best Matches{% endblock %}
+{% block title %}Mejores coincidencias{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-6">
-
-    {# Header #}
-    <div class="flex justify-between items-center mb-6">
+<div class="max-w-7xl mx-auto space-y-8">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-            <h2 class="text-2xl font-bold"> My Best Matches</h2>
-            {% if mode == 'skills' %}
-                <p class="text-gray-500 text-sm mt-1">Internship offers ranked by compatibility with your skills</p>
-            {% elif mode == 'career' %}
-                <p class="text-gray-500 text-sm mt-1">Suggested offers based on your career: <strong>{{ student_career }}</strong></p>
-            {% else %}
-                <p class="text-gray-500 text-sm mt-1">Most recent open offers</p>
-            {% endif %}
+            <p class="section-label">Coincidencias</p>
+            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Ofertas recomendadas</h1>
+            <p class="mt-2 text-[#6B7280]">Las vacantes más relevantes según tu perfil y tus habilidades.</p>
         </div>
-        <a href="{% url 'student_offers' %}" class="text-blue-500 hover:underline text-sm">← All offers</a>
+        <a href="{% url 'student_profile' %}" class="btn-secondary">Mi perfil</a>
     </div>
 
-    {# Banner según el modo #}
     {% if not student_skills %}
-        <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-4 rounded-lg mb-6">
-            <p class="font-semibold">You haven't added skills to your profile yet.</p>
-            <p class="text-sm mt-1">
-                <a href="{% url 'student_profile' %}" class="underline">Update your profile</a>
-                to get personalized matches based on your skills.
-                {% if mode == 'career' %}
-                    Showing suggestions based on your career: <strong>{{ student_career }}</strong>.
-                {% else %}
-                    Showing the most recent open offers.
-                {% endif %}
-            </p>
-        </div>
-    {% else %}
-        <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-6 text-sm">
-            Your skills: <span class="font-semibold">{{ student_skills }}</span>
+        <div class="card rounded-3xl border border-[#E5E7EB] bg-[#F9FAFB] p-6 text-[#6B7280]">
+            <p class="font-semibold">Aún no tienes habilidades registradas.</p>
+            <p class="mt-2">Actualiza tu perfil para recibir coincidencias más precisas.</p>
         </div>
     {% endif %}
 
-    {# Grid de tarjetas #}
     {% if ranked_offers %}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for item in ranked_offers %}
-                <div class="bg-white border rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col">
-
-                    {# Cuerpo de la tarjeta #}
-                    <div class="p-5 flex-1">
-                        <div class="flex justify-between items-start mb-3">
-                            <h3 class="text-lg font-bold text-gray-800 leading-tight pr-2">{{ item.offer.title }}</h3>
-                            {% if student_skills %}
-                                <span class="text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap {{ item.score_color }}">
-                                    {{ item.score }}%
-                                </span>
-                            {% else %}
-                                <span class="text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap {{ item.score_color }}">
-                                    {{ item.score_label }}
-                                </span>
-                            {% endif %}
-                        </div>
-
-                        <p class="text-blue-600 font-semibold text-sm mb-3">{{ item.offer.company.company_name }}</p>
-
-                        <div class="flex flex-wrap gap-2 mb-3">
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                                 {{ item.offer.location }}
-                            </span>
-                            <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                                 {{ item.offer.get_modality_display }}
-                            </span>
-                            {% if item.offer.salary %}
-                                <span class="bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
-                                     ${{ item.offer.salary }}
-                                </span>
-                            {% endif %}
-                        </div>
-
-                        <p class="text-gray-600 text-sm mb-3">{{ item.offer.description|truncatechars:120 }}</p>
-
-                        {# Skills requeridas como tags #}
-                        <div class="flex flex-wrap gap-1">
-                            {% for skill in item.offer.desired_skills.split|slice:":4" %}
-                                <span class="bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5 rounded-full">{{ skill|cut:"," }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    {# Footer: barra de progreso (solo si hay skills) #}
-                    {% if student_skills %}
-                    <div class="px-5 pb-5 pt-2 border-t border-gray-100">
-                        <div class="flex justify-between text-xs text-gray-400 mb-1">
-                            <span>{{ item.score_label }}</span>
-                            <span>{{ item.score }}% match</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="h-2 rounded-full {{ item.score_color_bar }}"
-                                 style="width: {{ item.score }}%;">
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    {# Botón Apply #}
-                    <div class="px-5 pb-5 {% if not student_skills %}pt-3 border-t border-gray-100{% endif %}">
-                        {% if item.offer.id in applied_ids %}
-                            <span class="text-sm text-gray-400 font-medium">✓ Applied</span>
-                        {% else %}
-                            <a href="{% url 'apply_to_offer' item.offer.id %}"
-                            class="block text-center bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                                Apply
-                            </a>
-                        {% endif %}
-                    </div>
-
+    <div class="grid gap-6 xl:grid-cols-3">
+        {% for item in ranked_offers %}
+            <article class="card p-6 flex flex-col justify-between">
+                <div>
+                    <p class="text-sm uppercase tracking-[0.3em] text-[#9CA3AF]">{{ item.offer.company.company_name }}</p>
+                    <h2 class="mt-2 text-xl font-semibold text-[#111827]">{{ item.offer.title }}</h2>
+                    <p class="mt-3 text-[#6B7280]">{{ item.offer.description|truncatechars:120 }}</p>
                 </div>
-            {% endfor %}
-        </div>
-
+                <div class="mt-6 flex flex-col gap-3">
+                    {% if student_skills %}
+                        <span class="badge badge-soft">Match {{ item.score }}%</span>
+                    {% else %}
+                        <span class="badge badge-soft">{{ item.score_label }}</span>
+                    {% endif %}
+                    <a href="{% url 'apply_to_offer' item.offer.id %}" class="btn-secondary">Ver oferta</a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
     {% else %}
-        <div class="text-center py-16 text-gray-500">
-            <p class="text-5xl mb-4">🔍</p>
-            <p class="text-lg font-semibold">No suggestions available</p>
-            <p class="text-sm mt-1">There are no open offers at the moment.</p>
-            <a href="{% url 'student_profile' %}" class="mt-4 inline-block text-blue-600 underline text-sm">
-                Update your skills profile
-            </a>
+        <div class="card p-10 text-center text-[#6B7280]">
+            <p class="text-lg font-semibold">No se encontraron coincidencias</p>
+            <p class="mt-2">Intenta actualizar tu perfil o cambiar los filtros.</p>
         </div>
     {% endif %}
 </div>

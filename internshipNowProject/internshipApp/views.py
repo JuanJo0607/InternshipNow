@@ -110,7 +110,7 @@ def company_profile(request):
     else:
         form = CompanyProfileForm(instance=profile)
 
-    return render(request, 'company_profile.html', {'form': form})
+    return render(request, 'company_profile.html', {'form': form, 'profile': profile})
 
 
 def home(request):
