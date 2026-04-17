@@ -1,25 +1,25 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Registrar | InternshipNow{% endblock %}
+{% block title %}Register | InternshipNow{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto card p-8">
     <div class="mb-8 text-center">
         <img src="{% static 'images/logo.svg' %}" alt="InternshipNow logo" class="mx-auto h-16 w-16" />
-        <h1 class="mt-5 text-3xl font-bold text-[#111827]">Crea tu cuenta</h1>
-        <p class="mt-3 text-sm text-[#6B7280]">Regístrate como estudiante o empresa y empieza a conectar talento real.</p>
+        <h1 class="mt-5 text-3xl font-bold text-[#111827]">Create your account</h1>
+        <p class="mt-3 text-sm text-[#6B7280]">Register as a student or company and start connecting real talent.</p>
     </div>
 
     <form method="post" class="space-y-6">
         {% csrf_token %}
         {{ form.as_p }}
 
-        <button type="submit" class="btn-primary w-full">Crear cuenta</button>
+        <button type="submit" class="btn-primary w-full">Create account</button>
     </form>
 
     <p class="mt-6 text-center text-[#6B7280]">
-        ¿Ya tienes cuenta? <a href="{% url 'login' %}" class="text-[#111827] font-semibold">Iniciar sesión</a>
+        Already have an account? <a href="{% url 'login' %}" class="text-[#111827] font-semibold">Log in</a>
     </p>
 </div>
 {% endblock %}

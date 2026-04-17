@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 
-{% block title %}Mis Vacantes{% endblock %}
+{% block title %}My Vacancies{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto space-y-8">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-            <p class="section-label">Mis vacantes</p>
-            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Publicaciones activas</h1>
-            <p class="mt-2 text-[#6B7280]">Supervisa tus ofertas, edita detalles y cierra aquellas que ya no estén abiertas.</p>
+            <p class="section-label">My vacancies</p>
+            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Active postings</h1>
+            <p class="mt-2 text-[#6B7280]">Supervise your offers, edit details, and close those that are no longer open.</p>
         </div>
         <div class="flex flex-wrap gap-3">
-            <a href="{% url 'create_offer' %}" class="btn-primary">+ Nueva oferta</a>
-            <a href="{% url 'company_applications' %}" class="btn-secondary">Postulaciones</a>
-            <a href="{% url 'company_profile' %}" class="btn-secondary">Perfil</a>
+            <a href="{% url 'create_offer' %}" class="btn-primary">+ New offer</a>
+            <a href="{% url 'company_applications' %}" class="btn-secondary">Applications</a>
+            <a href="{% url 'company_profile' %}" class="btn-secondary">Profile</a>
         </div>
     </div>
 
@@ -23,7 +23,7 @@
             <article class="card p-6">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div>
-                        <p class="text-xs uppercase tracking-[0.3em] text-[#9CA3AF]">Oferta</p>
+                        <p class="text-xs uppercase tracking-[0.3em] text-[#9CA3AF]">Offer</p>
                         <h2 class="mt-3 text-2xl font-semibold text-[#111827]">{{ offer.title }}</h2>
                         <p class="mt-2 text-[#6B7280]">{{ offer.company.company_name }}</p>
                     </div>
@@ -34,10 +34,10 @@
                 </div>
                 <p class="mt-4 text-[#6B7280]">{{ offer.description|truncatechars:140 }}</p>
                 <div class="mt-5 flex flex-wrap gap-3">
-                    <a href="{% url 'candidate_ranking' offer.id %}" class="btn-secondary">Candidatos</a>
-                    <a href="{% url 'edit_offer' offer.id %}" class="btn-secondary">Editar</a>
+                    <a href="{% url 'candidate_ranking' offer.id %}" class="btn-secondary">Candidates</a>
+                    <a href="{% url 'edit_offer' offer.id %}" class="btn-secondary">Edit</a>
                     {% if offer.status == 'open' %}
-                        <a href="{% url 'close_offer' offer.id %}" class="btn-danger">Cerrar vacante</a>
+                        <a href="{% url 'close_offer' offer.id %}" class="btn-danger">Close vacancy</a>
                     {% endif %}
                 </div>
             </article>
@@ -45,7 +45,7 @@
     </div>
     {% else %}
     <div class="card p-8 text-center text-[#6B7280]">
-        <p>No tienes vacantes publicadas aún.</p>
+        <p>You have not published any vacancies yet.</p>
     </div>
     {% endif %}
 </div>

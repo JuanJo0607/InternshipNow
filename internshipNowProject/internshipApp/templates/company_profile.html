@@ -1,20 +1,20 @@
 {% extends 'base.html' %}
 
-{% block title %}Perfil de Empresa{% endblock %}
+{% block title %}Company Profile{% endblock %}
 
 {% block content %}
 <div class="max-w-5xl mx-auto space-y-8">
     <section class="card p-8">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-                <p class="section-label">Empresa</p>
-                <h1 class="mt-4 text-3xl font-bold text-[#111827]">Perfil de la empresa</h1>
-                <p class="mt-3 text-[#6B7280]">Actualiza los datos clave de tu empresa y gestiona tus vacantes de forma profesional.</p>
+                <p class="section-label">Company</p>
+                <h1 class="mt-4 text-3xl font-bold text-[#111827]">Company profile</h1>
+                <p class="mt-3 text-[#6B7280]">Update your company's key data and manage your vacancies professionally.</p>
             </div>
             <div class="flex flex-wrap gap-3">
-                <a href="{% url 'company_offers' %}" class="btn-secondary">Mis vacantes</a>
-                <a href="{% url 'company_applications' %}" class="btn-secondary">Postulaciones</a>
-                <a href="{% url 'company_metrics_page' profile.id %}" class="btn-secondary">Métricas</a>
+                <a href="{% url 'company_offers' %}" class="btn-secondary">My vacancies</a>
+                <a href="{% url 'company_applications' %}" class="btn-secondary">Applications</a>
+                <a href="{% url 'company_metrics_page' profile.id %}" class="btn-secondary">Metrics</a>
             </div>
         </div>
     </section>
@@ -28,7 +28,7 @@
                     {{ field }}
                 </div>
             {% endfor %}
-            <button type="submit" class="btn-primary">Guardar cambios</button>
+            <button type="submit" class="btn-primary">Save changes</button>
         </form>
     </section>
 </div>

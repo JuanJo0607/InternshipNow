@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -215,7 +215,7 @@
                 </span>
                 <div>
                     <p class="text-lg font-semibold tracking-tight">InternshipNow</p>
-                    <p class="text-sm text-[#6B7280]">Talento real para oportunidades reales</p>
+                    <p class="text-sm text-[#6B7280]">Real talent for real opportunities</p>
                 </div>
             </a>
 
@@ -223,23 +223,23 @@
                 {% if user.is_authenticated %}
                     <span class="inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F3F4F6] px-3 py-2 text-sm font-medium text-[#000000]">
                         <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#F3F4F6] text-[#000000]">👤</span>
-                        {{ user.role|default:"Usuario"|title }}
+                        {{ user.role|default:"User"|title }}
                     </span>
                     {% if user.role == 'company' %}
-                        <a href="{% url 'company_profile' %}" class="btn-secondary">Mi perfil</a>
+                        <a href="{% url 'company_profile' %}" class="btn-secondary">My profile</a>
                     {% else %}
-                        <a href="{% url 'student_profile' %}" class="btn-secondary">Mi perfil</a>
+                        <a href="{% url 'student_profile' %}" class="btn-secondary">My profile</a>
                     {% endif %}
                     <form action="{% url 'logout' %}" method="post" class="inline">
                         {% csrf_token %}
                         <button type="submit" class="btn-secondary inline-flex items-center gap-2">
-                            Salir
+                            Logout
                             <span aria-hidden="true">→</span>
                         </button>
                     </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn-secondary">Ingresar</a>
-                    <a href="{% url 'register' %}" class="btn-primary">Regístrate</a>
+                    <a href="{% url 'login' %}" class="btn-secondary">Log in</a>
+                    <a href="{% url 'register' %}" class="btn-primary">Register</a>
                 {% endif %}
             </div>
         </div>
@@ -252,7 +252,7 @@
     <footer class="border-t border-[#E5E7EB] bg-white">
         <div class="container mx-auto px-4 py-6 text-center footer-minimal">
             <p class="font-semibold">InternshipNow</p>
-            <p class="mt-2">© {{ now|date:"Y" }} InternshipNow. Todos los derechos reservados.</p>
+            <p class="mt-2">© {{ now|date:"Y" }} InternshipNow. All rights reserved.</p>
         </div>
     </footer>
 

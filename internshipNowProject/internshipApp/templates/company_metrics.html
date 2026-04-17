@@ -1,44 +1,44 @@
 {% extends 'base.html' %}
 
-{% block title %}Métricas de empresa{% endblock %}
+{% block title %}Company Metrics{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto space-y-8">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-            <p class="section-label">Métricas</p>
-            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Dashboard de {{ company.company_name }}</h1>
-            <p class="mt-2 text-[#6B7280]">Monitorea el rendimiento de tus ofertas y recibe datos claros para tomar decisiones.</p>
+            <p class="section-label">Metrics</p>
+            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Dashboard for {{ company.company_name }}</h1>
+            <p class="mt-2 text-[#6B7280]">Monitor the performance of your offers and get clear data to make decisions.</p>
         </div>
-        <a href="{% url 'company_profile' %}" class="btn-secondary">Volver al perfil</a>
+        <a href="{% url 'company_profile' %}" class="btn-secondary">Back to profile</a>
     </div>
 
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="card p-6">
-            <p class="text-sm text-[#6B7280]">Total de vistas</p>
+            <p class="text-sm text-[#6B7280]">Total views</p>
             <p class="text-3xl font-bold mt-3" id="summaryTotalViews">0</p>
         </div>
         <div class="card p-6">
-            <p class="text-sm text-[#6B7280]">Total de postulaciones</p>
+            <p class="text-sm text-[#6B7280]">Total applications</p>
             <p class="text-3xl font-bold mt-3" id="summaryTotalApplications">0</p>
         </div>
         <div class="card p-6">
-            <p class="text-sm text-[#6B7280]">Días promedio para cerrar</p>
+            <p class="text-sm text-[#6B7280]">Average days to close</p>
             <p class="text-3xl font-bold mt-3" id="summaryAverageClose">0.0</p>
         </div>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="card p-6">
-            <h2 class="text-xl font-semibold text-[#111827]">Vistas vs postulaciones</h2>
-            <p class="mt-2 text-[#6B7280]">Comparativa por oferta.</p>
+            <h2 class="text-xl font-semibold text-[#111827]">Views vs applications</h2>
+            <p class="mt-2 text-[#6B7280]">Comparison by offer.</p>
             <div class="mt-6 h-80">
                 <canvas id="viewsApplicationsChart" width="400" height="300"></canvas>
             </div>
         </div>
         <div class="card p-6">
-            <h2 class="text-xl font-semibold text-[#111827]">Candidatos por estado</h2>
-            <p class="mt-2 text-[#6B7280]">Estado general de las aplicaciones.</p>
+            <h2 class="text-xl font-semibold text-[#111827]">Candidates by status</h2>
+            <p class="mt-2 text-[#6B7280]">General status of applications.</p>
             <div class="mt-6 h-80">
                 <canvas id="candidatesStatusChart" width="400" height="300"></canvas>
             </div>
@@ -48,38 +48,38 @@
     <div class="card p-6 bg-[#F9FAFB] border-[#E5E7EB]">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-                <p class="text-sm text-[#6B7280]">Filtrar métricas</p>
-                <p class="text-sm text-[#9CA3AF]">Selecciona mes y año para ajustar los datos.</p>
+                <p class="text-sm text-[#6B7280]">Filter metrics</p>
+                <p class="text-sm text-[#9CA3AF]">Select month and year to adjust the data.</p>
             </div>
             <div class="flex flex-wrap gap-3 items-center">
                 <select id="monthSelect" class="input-field max-w-[10rem]">
-                    <option value="">Todo el año</option>
-                    <option value="1">Ene</option>
+                    <option value="">All year</option>
+                    <option value="1">Jan</option>
                     <option value="2">Feb</option>
                     <option value="3">Mar</option>
-                    <option value="4">Abr</option>
+                    <option value="4">Apr</option>
                     <option value="5">May</option>
                     <option value="6">Jun</option>
                     <option value="7">Jul</option>
-                    <option value="8">Ago</option>
+                    <option value="8">Aug</option>
                     <option value="9">Sep</option>
                     <option value="10">Oct</option>
                     <option value="11">Nov</option>
-                    <option value="12">Dic</option>
+                    <option value="12">Dec</option>
                 </select>
                 <select id="yearSelect" class="input-field max-w-[10rem]">
-                    <option value="">Todos los años</option>
+                    <option value="">All years</option>
                     <option value="2024">2024</option>
                     <option value="2025">2025</option>
                     <option value="2026" selected>2026</option>
                 </select>
-                <button id="refreshButton" class="btn-primary">Actualizar</button>
+                <button id="refreshButton" class="btn-primary">Update</button>
             </div>
         </div>
     </div>
 
-    <div id="loadingState" class="rounded-xl border border-[#E5E7EB] bg-[#F3F4F6] p-6 text-center text-[#6B7280]">Cargando métricas...</div>
-    <div id="emptyState" class="hidden rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-6 text-center text-[#6B7280]">No hay métricas para el periodo seleccionado.</div>
+    <div id="loadingState" class="rounded-xl border border-[#E5E7EB] bg-[#F3F4F6] p-6 text-center text-[#6B7280]">Loading metrics...</div>
+    <div id="emptyState" class="hidden rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-6 text-center text-[#6B7280]">No metrics for the selected period.</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

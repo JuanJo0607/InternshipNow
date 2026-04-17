@@ -1,20 +1,20 @@
 {% extends 'base.html' %}
 
-{% block title %}Ranking de candidatos{% endblock %}
+{% block title %}Candidate Ranking{% endblock %}
 
 {% block content %}
 <div class="max-w-6xl mx-auto space-y-8">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="section-label">Ranking</p>
-            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Candidatos para {{ offer.title }}</h1>
-            <p class="mt-2 text-[#6B7280]">Compara candidatos según su match con la vacante.</p>
+            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Candidates for {{ offer.title }}</h1>
+            <p class="mt-2 text-[#6B7280]">Compare candidates based on their match with the vacancy.</p>
         </div>
-        <a href="{% url 'company_offers' %}" class="btn-secondary">Volver a vacantes</a>
+        <a href="{% url 'company_offers' %}" class="btn-secondary">Back to vacancies</a>
     </div>
 
     <div class="card p-6">
-        <p class="text-sm text-[#6B7280]">Skills requeridas:</p>
+        <p class="text-sm text-[#6B7280]">Required skills:</p>
         <p class="mt-1 text-[#111827]">{{ offer.desired_skills }}</p>
     </div>
 
@@ -24,7 +24,7 @@
             <div class="card overflow-hidden">
                 <button type="button" class="w-full p-6 text-left flex items-start justify-between gap-4" onclick="toggleRow('row-{{ forloop.counter }}')">
                     <div>
-                        <p class="text-xs uppercase tracking-[0.3em] text-[#9CA3AF]">Candidato {{ forloop.counter }}</p>
+                        <p class="text-xs uppercase tracking-[0.3em] text-[#9CA3AF]">Candidate {{ forloop.counter }}</p>
                         <h2 class="mt-2 text-xl font-semibold text-[#111827]">{{ item.student.user.get_full_name|default:item.student.user.username }}</h2>
                         <p class="mt-2 text-sm text-[#6B7280]">{{ item.student.career }}</p>
                     </div>
@@ -36,7 +36,7 @@
                 <div id="row-{{ forloop.counter }}" class="hidden border-t border-[#E5E7EB] bg-[#F9FAFB] p-6">
                     <div class="grid gap-4 lg:grid-cols-2">
                         <div>
-                            <p class="text-sm font-semibold text-[#374151] mb-2">Skills que coinciden</p>
+                            <p class="text-sm font-semibold text-[#374151] mb-2">Matching skills</p>
                             <div class="flex flex-wrap gap-2">
                                 {% for skill in item.matched_skills %}
                                     <span class="badge badge-soft">{{ skill }}</span>
@@ -44,12 +44,12 @@
                             </div>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-[#374151] mb-2">Perfil completo</p>
+                            <p class="text-sm font-semibold text-[#374151] mb-2">Full profile</p>
                             <p class="text-sm text-[#6B7280]">{{ item.student.skills }}</p>
                         </div>
                         {% if item.student.cv_pdf %}
                         <div class="md:col-span-2">
-                            <a href="{{ item.student.cv_pdf.url }}" target="_blank" class="btn-secondary">Ver CV</a>
+                            <a href="{{ item.student.cv_pdf.url }}" target="_blank" class="btn-secondary">View CV</a>
                         </div>
                         {% endif %}
                     </div>
@@ -59,8 +59,8 @@
     </div>
     {% else %}
     <div class="card p-10 text-center text-[#6B7280]">
-        <p class="text-lg font-semibold">Aún no hay candidatos disponibles.</p>
-        <p class="mt-2">Cuando recibas postulaciones, aparecerán aquí.</p>
+        <p class="text-lg font-semibold">No candidates available yet.</p>
+        <p class="mt-2">When you receive applications, they will appear here.</p>
     </div>
     {% endif %}
 </div>

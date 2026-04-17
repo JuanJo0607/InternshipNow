@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}{{ action }} vacante{% endblock %}
+{% block title %}{{ action }} vacancy{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto card p-8">
     <div class="mb-8">
-        <p class="section-label">Oferta</p>
-        <h1 class="mt-4 text-3xl font-bold text-[#111827]">{{ action }} vacante</h1>
-        <p class="mt-3 text-[#6B7280]">Completa la información con claridad para que los candidatos entiendan la oportunidad.</p>
+        <p class="section-label">Offer</p>
+        <h1 class="mt-4 text-3xl font-bold text-[#111827]">{{ action }} vacancy</h1>
+        <p class="mt-3 text-[#6B7280]">Complete the information clearly so candidates understand the opportunity.</p>
     </div>
 
     <form method="post" class="space-y-6">
@@ -18,10 +18,10 @@
                     <input type="hidden" name="desired_skills" id="skills-hidden" value="{{ field.value|default:'' }}">
                     <div id="skills-container" class="flex flex-wrap gap-2 rounded-2xl border border-[#E5E7EB] bg-white p-3 min-h-[56px] cursor-text"></div>
                     <div class="relative">
-                        <input id="skills-input" type="text" placeholder="Agregar habilidad" autocomplete="off" class="input-field" />
+                        <input id="skills-input" type="text" placeholder="Add skill" autocomplete="off" class="input-field" />
                         <ul id="skills-dropdown" class="absolute z-10 w-full bg-white border border-[#E5E7EB] rounded-2xl shadow-lg max-h-48 overflow-y-auto hidden"></ul>
                     </div>
-                    <p class="text-sm text-[#6B7280]">Escribe habilidades relevantes y añade etiquetas de forma rápida.</p>
+                    <p class="text-sm text-[#6B7280]">Type relevant skills and quickly add tags.</p>
                 </div>
             {% else %}
                 <div class="flex flex-col gap-2">
