@@ -21,8 +21,18 @@
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <p class="text-xs uppercase tracking-[0.3em] text-[#9CA3AF]">{{ app.offer.title }}</p>
-                        <h2 class="mt-2 text-2xl font-semibold text-[#111827]">{{ app.student.user.username }}</h2>
-                        <p class="mt-2 text-sm text-[#6B7280]">{{ app.offer.company.company_name }}</p>
+                        <h2 class="mt-2 text-2xl font-semibold text-[#111827]">{{ app.student.user.get_full_name|default:app.student.user.username }}</h2>
+                        <p class="mt-1 text-sm text-[#6B7280]">{{ app.student.career }} · {{ app.student.university }}</p>
+                        <div class="mt-2 flex flex-wrap gap-1">
+                            {% for skill in app.student.skills.split %}
+                                <span class="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-medium px-2 py-0.5 rounded-full">{{ skill|cut:"," }}</span>
+                            {% endfor %}
+                        </div>
+                        {% if app.student.cv_pdf %}
+                        <a href="{{ app.student.cv_pdf.url }}" target="_blank" class="mt-3 inline-block text-sm text-[#1D4ED8] hover:underline">
+                            📄 Ver CV
+                        </a>
+                        {% endif %}
                     </div>
                     <div class="flex flex-col items-start gap-3 sm:items-end">
                         <span class="badge badge-soft">{{ app.get_status_display }}</span>

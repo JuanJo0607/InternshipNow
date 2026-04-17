@@ -33,12 +33,21 @@
                     </div>
                 </div>
                 <p class="mt-4 text-[#6B7280]">{{ offer.description|truncatechars:140 }}</p>
+                <p class="mt-3 text-sm text-[#6B7280]">
+                    <span class="font-semibold text-[#111827]">{{ offer.applications.count }}</span> postulación{{ offer.applications.count|pluralize:"es" }}
+                </p>
                 <div class="mt-5 flex flex-wrap gap-3">
                     <a href="{% url 'candidate_ranking' offer.id %}" class="btn-secondary">Candidatos</a>
                     <a href="{% url 'edit_offer' offer.id %}" class="btn-secondary">Editar</a>
                     {% if offer.status == 'open' %}
                         <a href="{% url 'close_offer' offer.id %}" class="btn-danger">Cerrar vacante</a>
+                    {% else %}
+                        <a href="{% url 'reopen_offer' offer.id %}" class="btn-success">Reabrir vacante</a>
                     {% endif %}
+                        <a href="{% url 'delete_offer' offer.id %}" class="btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta oferta?')">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    </a>
                 </div>
             </article>
         {% endfor %}
