@@ -87,7 +87,6 @@ def student_profile(request):
 
     profile = StudentProfile.objects.get(user=request.user)
 
-
     if request.method == 'POST':
         # Forzar universidad a 'Universidad EAFIT' siempre
         post_data = request.POST.copy()
@@ -95,6 +94,11 @@ def student_profile(request):
         form = StudentProfileForm(post_data, instance=profile)
         if form.is_valid():
             form.save()
+            profile.refresh_from_db()
+            profile_status = is_profile_complete(request.user)
+            if not profile_status['complete']:
+                missing = ', '.join(profile_status['missing_fields'])
+                messages.warning(request, f"Your profile is still incomplete. Missing: {missing}. Please complete it to improve your opportunities.")
     else:
         form = StudentProfileForm(instance=profile)
 
