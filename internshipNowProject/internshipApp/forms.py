@@ -8,12 +8,19 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ('username', 'email', 'role', 'password1', 'password2')
 
 
+
 class StudentProfileForm(forms.ModelForm):
     skills = forms.CharField(required=False, widget=forms.Textarea)
-    
+
     class Meta:
         model = StudentProfile
         fields = ['university', 'career', 'skills', 'bio']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['university'].initial = 'Universidad EAFIT'
+        self.fields['university'].disabled = True
+        self.fields['university'].widget.attrs['readonly'] = True
 
 
 class CompanyProfileForm(forms.ModelForm):

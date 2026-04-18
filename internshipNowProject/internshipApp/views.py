@@ -87,8 +87,12 @@ def student_profile(request):
 
     profile = StudentProfile.objects.get(user=request.user)
 
+
     if request.method == 'POST':
-        form = StudentProfileForm(request.POST, instance=profile)
+        # Forzar universidad a 'Universidad EAFIT' siempre
+        post_data = request.POST.copy()
+        post_data['university'] = 'Universidad EAFIT'
+        form = StudentProfileForm(post_data, instance=profile)
         if form.is_valid():
             form.save()
     else:

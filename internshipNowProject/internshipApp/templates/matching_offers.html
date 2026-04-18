@@ -1,25 +1,25 @@
 {% extends 'base.html' %}
 
-{% block title %}Mejores coincidencias{% endblock %}
+{% block title %}Best Matches{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto space-y-8">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-            <p class="section-label">Coincidencias</p>
-            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Ofertas recomendadas</h1>
-            <p class="mt-2 text-[#6B7280]">Las vacantes más relevantes según tu perfil y tus habilidades.</p>
+            <p class="section-label">Matches</p>
+            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Recommended Offers</h1>
+            <p class="mt-2 text-[#6B7280]">The most relevant vacancies according to your profile and skills.</p>
         </div>
         <div class="flex gap-3">
-            <a href="{% url 'student_offers' %}" class="btn-secondary">← Todas las ofertas</a>
-            <a href="{% url 'student_profile' %}" class="btn-secondary">Mi perfil</a>
+            <a href="{% url 'student_offers' %}" class="btn-secondary">← All offers</a>
+            <a href="{% url 'student_profile' %}" class="btn-secondary">My profile</a>
         </div>
     </div>
 
     {% if not student_skills %}
         <div class="card rounded-3xl border border-[#E5E7EB] bg-[#F9FAFB] p-6 text-[#6B7280]">
-            <p class="font-semibold">Aún no tienes habilidades registradas.</p>
-            <p class="mt-2">Actualiza tu perfil para recibir coincidencias más precisas.</p>
+            <p class="font-semibold">You don't have any skills registered yet.</p>
+            <p class="mt-2">Update your profile to receive more accurate matches.</p>
         </div>
     {% endif %}
 
@@ -43,15 +43,15 @@
                     {% else %}
                         <span class="badge badge-soft">{{ item.score_label }}</span>
                     {% endif %}
-                    <a href="{% url 'apply_to_offer' item.offer.id %}" class="btn-secondary">Ver oferta</a>
+                    <a href="{% url 'apply_to_offer' item.offer.id %}" class="btn-secondary">View offer</a>
                 </div>
             </article>
         {% endfor %}
     </div>
     {% else %}
         <div class="card p-10 text-center text-[#6B7280]">
-            <p class="text-lg font-semibold">No se encontraron coincidencias</p>
-            <p class="mt-2">Intenta actualizar tu perfil o cambiar los filtros.</p>
+            <p class="text-lg font-semibold">No matches found</p>
+            <p class="mt-2">Try updating your profile or changing the filters.</p>
         </div>
     {% endif %}
 </div>

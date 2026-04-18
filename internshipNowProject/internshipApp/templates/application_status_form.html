@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}Actualizar estado{% endblock %}
+{% block title %}Update status{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto card p-8">
-    <h1 class="text-2xl font-bold text-[#111827] mb-4">Actualizar estado</h1>
-    <p class="text-[#6B7280] mb-6">Cambia el estado de la aplicación para informar al candidato sobre el proceso.</p>
+    <h1 class="text-2xl font-bold text-[#111827] mb-4">Update status</h1>
+    <p class="text-[#6B7280] mb-6">Change the application status to inform the candidate about the process.</p>
     <form method="post" class="space-y-6">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn-primary">Guardar cambios</button>
+        <button type="submit" class="btn-primary">Save changes</button>
     </form>
 </div>
 {% endblock %}
