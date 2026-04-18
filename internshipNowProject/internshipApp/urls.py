@@ -27,4 +27,6 @@ urlpatterns = [
     path('api/profile-status/', views.profile_status, name='profile_status'),
     path('company/offers/<int:offer_id>/candidates/', views.candidate_ranking, name='candidate_ranking'),
     path('notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
+    path('company/offers/<int:offer_id>/reopen/', views.reopen_offer, name='reopen_offer'),
+    path('company/offers/<int:offer_id>/delete/', views.delete_offer, name='delete_offer'),
 ]

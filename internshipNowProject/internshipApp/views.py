@@ -32,7 +32,8 @@ def student_offers(request):
     location = request.GET.get('location', '').strip()
     salary   = request.GET.get('salary', '').strip()
     modality = request.GET.get('modality', '').strip()
-    skill    = request.GET.get('skill', '').strip()
+    skills_param = request.GET.get('skills', '').strip()
+    skills_list = [s.strip() for s in skills_param.split(',') if s.strip()]
 
     if location:
         offers = offers.filter(location__icontains=location)
@@ -40,7 +41,7 @@ def student_offers(request):
         offers = offers.filter(salary__gte=salary)
     if modality:
         offers = offers.filter(modality=modality)
-    if skill:
+    for skill in skills_list:
         offers = offers.filter(desired_skills__icontains=skill)
 
     # FR-11 – calcular score de compatibilidad
@@ -74,7 +75,7 @@ def student_offers(request):
             'location': location,
             'salary':   salary,
             'modality': modality,
-            'skill':    skill,
+            'skills':   skills_param,
         },
     })
 
@@ -220,6 +221,25 @@ def close_offer(request, offer_id):
     offer.save()
     return redirect('company_offers')
 
+@login_required
+def reopen_offer(request, offer_id):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    offer = InternshipOffer.objects.get(id=offer_id, company=profile)
+    offer.status = 'open'
+    offer.closed_at = None
+    offer.save()
+    return redirect('company_offers')
+
+@login_required
+def delete_offer(request, offer_id):
+    if request.user.role != 'company':
+        return redirect('home')
+    profile = CompanyProfile.objects.get(user=request.user)
+    offer = InternshipOffer.objects.get(id=offer_id, company=profile)
+    offer.delete()
+    return redirect('company_offers')
 
 @login_required
 def offer_detail(request, offer_id):

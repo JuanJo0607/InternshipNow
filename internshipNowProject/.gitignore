@@ -2,6 +2,9 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+*/venv/
 db.sqlite3
 .vscode/
-
+*.egg-info/
+dist/
+build/
