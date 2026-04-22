@@ -94,13 +94,19 @@ def student_profile(request):
         form = StudentProfileForm(post_data, instance=profile)
         if form.is_valid():
             form.save()
+            request.user.first_name = form.cleaned_data.get('first_name', '')
+            request.user.last_name = form.cleaned_data.get('last_name', '')
+            request.user.save(update_fields=['first_name', 'last_name'])
             profile.refresh_from_db()
             profile_status = is_profile_complete(request.user)
             if not profile_status['complete']:
                 missing = ', '.join(profile_status['missing_fields'])
                 messages.warning(request, f"Your profile is still incomplete. Missing: {missing}. Please complete it to improve your opportunities.")
     else:
-        form = StudentProfileForm(instance=profile)
+        form = StudentProfileForm(instance=profile, initial={
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+        })
 
     return render(request, 'student_profile.html', {'form': form, 'profile': profile})
 
@@ -130,11 +136,15 @@ def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.first_name = form.cleaned_data.get('first_name', '')
+            user.last_name = form.cleaned_data.get('last_name', '')
+            user.save()
             login(request, user)
 
             if user.role == 'student':
-                StudentProfile.objects.create(user=user)
+                cedula = form.cleaned_data.get('cedula', '')
+                StudentProfile.objects.create(user=user, cedula=cedula)
                 return redirect('student_profile')
             elif user.role == 'company':
                 CompanyProfile.objects.create(user=user)
@@ -341,7 +351,24 @@ def company_applications(request):
     if request.user.role != 'company':
         return redirect('home')
     profile = CompanyProfile.objects.get(user=request.user)
-    applications = InternshipApplication.objects.filter(offer__company=profile).order_by('-applied_at')
+    from .matching import normalize_skills, _score_label, _score_color
+    raw_apps = InternshipApplication.objects.filter(
+        offer__company=profile
+    ).select_related('student__user', 'offer').order_by('-applied_at')
+    applications = []
+    for app in raw_apps:
+        student_skills = normalize_skills(app.student.skills or '')
+        offer_skills = normalize_skills(app.offer.desired_skills or '')
+        matched = student_skills & offer_skills
+        score = int((len(matched) / len(offer_skills)) * 100) if offer_skills else 0
+        applications.append({
+            'app': app,
+            'score': score,
+            'score_label': _score_label(score),
+            'score_color': _score_color(score),
+            'matched_skills': sorted(matched),
+        })
+    applications.sort(key=lambda x: x['score'], reverse=True)
     return render(request, 'company_applications.html', {'applications': applications})
 
 
@@ -357,10 +384,45 @@ def update_application_status(request, application_id):
         form = ApplicationStatusForm(request.POST, instance=application)
         if form.is_valid():
             form.save()
+            _send_status_notification(application)
             return redirect('company_applications')
     else:
         form = ApplicationStatusForm(instance=application)
     return render(request, 'application_status_form.html', {'form': form, 'application': application})
+
+
+def _send_status_notification(application):
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+
+    student_user = application.student.user
+    offer_title = application.offer.title
+
+    if application.status == 'accepted':
+        title = 'Application accepted'
+        message = f'Congratulations! Your application for "{offer_title}" has been accepted.'
+    else:
+        title = 'Application update'
+        message = f'Your application for "{offer_title}" has not moved forward this time.'
+
+    notification = Notification.objects.create(
+        user=student_user,
+        title=title,
+        message=message,
+        notification_type='status_update',
+    )
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"notifications_{student_user.id}",
+        {
+            "type": "notification_message",
+            "notification_id": notification.id,
+            "title": notification.title,
+            "message": notification.message,
+            "created_at": notification.created_at.isoformat(),
+        }
+    )
 
 
 # US-10: Vista para subir/reemplazar CV en PDF

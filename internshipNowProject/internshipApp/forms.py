@@ -3,18 +3,32 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import User, StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
 
 class CustomUserCreationForm(UserCreationForm):
+    first_name = forms.CharField(max_length=150, required=True, label='First name')
+    last_name = forms.CharField(max_length=150, required=True, label='Last name')
+    cedula = forms.CharField(max_length=20, required=False, label='National ID')
+
     class Meta:
         model = User
-        fields = ('username', 'email', 'role', 'password1', 'password2')
+        fields = ('first_name', 'last_name', 'username', 'email', 'role', 'cedula', 'password1', 'password2')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('role') == 'student' and not cleaned_data.get('cedula', '').strip():
+            self.add_error('cedula', 'This field is required for students.')
+        return cleaned_data
 
 
 
 class StudentProfileForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=150, required=True, label='First name')
+    last_name = forms.CharField(max_length=150, required=True, label='Last name')
     skills = forms.CharField(required=False, widget=forms.Textarea)
 
     class Meta:
         model = StudentProfile
-        fields = ['university', 'career', 'skills', 'bio']
+        fields = ['cedula', 'university', 'career', 'skills', 'bio']
+
+    field_order = ['first_name', 'last_name', 'cedula', 'university', 'career', 'skills', 'bio']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -72,7 +72,7 @@ def get_suggestions(offers, student_skills_text: str, student_career: str) -> di
  
     if has_skills:
         ranked = annotate_offers_with_score(offers, student_skills_text)
-        matched = [r for r in ranked if r['score'] > 0]
+        matched = [r for r in ranked if r['score'] >= 50]
         return {
             'ranked_offers': matched,
             'mode': 'skills',
@@ -99,7 +99,7 @@ def get_suggestions(offers, student_skills_text: str, student_career: str) -> di
         ranked.append({
             'offer': offer,
             'score': 0,
-            'score_label': 'Sugerida por tu carrera' if mode == 'career' else 'Oferta reciente',
+            'score_label': 'Suggested by your career' if mode == 'career' else 'Recent offer',
             'score_color': 'bg-blue-100 text-blue-800',
             'score_color_bar': 'bg-blue-300',
         })
@@ -113,13 +113,13 @@ def get_suggestions(offers, student_skills_text: str, student_career: str) -> di
 
 def _score_label(score: int) -> str:
     if score >= 80:
-        return 'Alta compatibilidad'
+        return 'High compatibility'
     elif score >= 50:
-        return 'Compatibilidad media'
+        return 'Medium compatibility'
     elif score > 0:
-        return 'Baja compatibilidad'
+        return 'Low compatibility'
     else:
-        return 'Sin coincidencias'
+        return 'No match'
 
 
 def _score_color(score: int) -> str:

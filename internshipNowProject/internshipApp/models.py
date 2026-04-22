@@ -11,6 +11,7 @@ class User(AbstractUser):
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    cedula = models.CharField(max_length=20, blank=True)
     university = models.CharField(max_length=255, default='Universidad EAFIT')
     career = models.CharField(max_length=255)
     skills = models.TextField(blank=True)
@@ -20,8 +21,8 @@ class StudentProfile(models.Model):
 
     def __str__(self):
         if self.is_verified:
-            return f"{self.user.username} - Estudiante Verificado"
-        return f"{self.user.username} - Pendiente de verificación"
+            return f"{self.user.username} - Verified Student"
+        return f"{self.user.username} - Pending verification"
 
 
 class CompanyProfile(models.Model):

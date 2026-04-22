@@ -7,8 +7,8 @@
         "last_login": "2026-03-09T22:31:04.410Z",
         "is_superuser": true,
         "username": "juandev",
-        "first_name": "",
-        "last_name": "",
+        "first_name": "Juan David",
+        "last_name": "Restrepo",
         "email": "juan.restrepo023@gmail.com",
         "is_staff": true,
         "is_active": true,
@@ -26,8 +26,8 @@
         "last_login": "2026-03-09T22:25:29Z",
         "is_superuser": false,
         "username": "student_test",
-        "first_name": "",
-        "last_name": "",
+        "first_name": "Santiago",
+        "last_name": "Gómez Vargas",
         "email": "student@test.com",
         "is_staff": false,
         "is_active": true,
@@ -45,8 +45,8 @@
         "last_login": "2026-03-09T22:24:19Z",
         "is_superuser": false,
         "username": "company_test",
-        "first_name": "",
-        "last_name": "",
+        "first_name": "Camila",
+        "last_name": "Rodríguez Peña",
         "email": "company@test.com",
         "is_staff": false,
         "is_active": true,
@@ -61,10 +61,13 @@
     "pk": 3,
     "fields": {
         "user": 6,
-        "university": "Stanford University",
+        "cedula": "1020345678",
+        "university": "Universidad EAFIT",
         "career": "Computer Science & Artificial Intelligence",
         "skills": "Python, Django, SQL, React.js, Machine Learning, Git, Docker, Figma",
-        "bio": "Passionate junior-year student with a focus on building accessible and scalable web applications. I have experience working on open-source projects and love solving complex algorithmic challenges. Currently looking for a summer internship where I can apply my full-stack development skills and learn from industry leaders in the tech space."
+        "bio": "Passionate junior-year student with a focus on building accessible and scalable web applications. I have experience working on open-source projects and love solving complex algorithmic challenges. Currently looking for a summer internship where I can apply my full-stack development skills and learn from industry leaders in the tech space.",
+        "is_verified": false,
+        "cv_pdf": ""
     }
 },
 {

@@ -20,7 +20,14 @@
             <form method="post" class="space-y-6">
                 {% csrf_token %}
                 {% for field in form %}
-                    {% if field.name == 'skills' %}
+                    {% if field.name == 'first_name' or field.name == 'last_name' %}
+                        <div class="flex flex-col gap-2">
+                            <label class="form-label">{{ field.label }}</label>
+                            <input type="text" name="{{ field.html_name }}" class="input-field"
+                                   value="{{ field.value|default:'' }}" required>
+                            {% if field.errors %}<p class="text-xs text-red-600">{{ field.errors.0 }}</p>{% endif %}
+                        </div>
+                    {% elif field.name == 'skills' %}
                         <div class="flex flex-col gap-2">
                             <label class="form-label">{{ field.label }}</label>
                             <input type="hidden" name="skills" id="skills-hidden" value="{{ profile.skills }}">
@@ -50,6 +57,12 @@
                                 <ul id="university-dropdown" class="absolute z-10 w-full bg-white border border-[#E5E7EB] rounded-2xl shadow-lg max-h-48 overflow-y-auto hidden"></ul>
                             </div>
                             <p class="text-sm text-[#6B7280]">Only Universidad EAFIT is available.</p>
+                        </div>
+                    {% elif field.name == 'cedula' %}
+                        <div class="flex flex-col gap-2">
+                            <label class="form-label">National ID</label>
+                            {{ field }}
+                            <p class="text-sm text-[#6B7280]">Your national identity document number.</p>
                         </div>
                     {% else %}
                         <div class="flex flex-col gap-2">

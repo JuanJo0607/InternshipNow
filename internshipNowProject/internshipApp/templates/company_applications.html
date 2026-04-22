@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load tz %}
+{% load internship_filters %}
 
 {% block title %}Applications{% endblock %}
 
@@ -15,36 +16,63 @@
     </div>
 
     {% if applications %}
-    <div class="grid gap-6">
-        {% for app in applications %}
-            <article class="card p-6">
-                <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.3em] text-[#9CA3AF]">{{ app.offer.title }}</p>
-                        <h2 class="mt-2 text-2xl font-semibold text-[#111827]">{{ app.student.user.get_full_name|default:app.student.user.username }}</h2>
-                        <p class="mt-1 text-sm text-[#6B7280]">{{ app.student.career }} · {{ app.student.university }}</p>
-                        <div class="mt-2 flex flex-wrap gap-1">
-                            {% for skill in app.student.skills.split %}
-                                <span class="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-medium px-2 py-0.5 rounded-full">{{ skill|cut:"," }}</span>
-                            {% endfor %}
-                        </div>
-                        {% if app.student.cv_pdf %}
-                        <a href="{{ app.student.cv_pdf.url }}" target="_blank" class="mt-3 inline-block text-sm text-[#1D4ED8] hover:underline">
-                            📄 Ver CV
-                        </a>
-                        {% endif %}
+    <div class="space-y-4">
+        {% for item in applications %}
+            <div class="card overflow-hidden">
+                <button type="button"
+                        class="w-full p-6 text-left flex items-start justify-between gap-4"
+                        onclick="toggleRow('row-{{ forloop.counter }}')">
+                    <div class="min-w-0">
+                        <p class="text-xs uppercase tracking-[0.3em] text-[#9CA3AF]">{{ item.app.offer.title }}</p>
+                        <h2 class="mt-2 text-xl font-semibold text-[#111827]">
+                            {{ item.app.student.user.get_full_name|default:item.app.student.user.username }}
+                        </h2>
+                        <p class="mt-0.5 text-xs text-[#9CA3AF]">@{{ item.app.student.user.username }}{% if item.app.student.cedula %} · ID: {{ item.app.student.cedula }}{% endif %}</p>
+                        <p class="mt-1 text-sm text-[#6B7280]">{{ item.app.student.career }} · {{ item.app.student.university }}</p>
                     </div>
-                    <div class="flex flex-col items-start gap-3 sm:items-end">
-                        <span class="badge badge-soft">{{ app.get_status_display }}</span>
-                        <p class="text-sm text-[#6B7280]">{{ app.applied_at|date:"Y-m-d H:i" }}</p>
+                    <div class="flex flex-col items-end gap-2 shrink-0">
+                        <span class="badge badge-soft {{ item.score_color }}">{{ item.score_label }}</span>
+                        <span class="text-sm font-semibold text-[#111827]">{{ item.score }}%</span>
+                        <span class="badge badge-soft">{{ item.app.get_status_display }}</span>
+                        <p class="text-xs text-[#9CA3AF]">{{ item.app.applied_at|date:"Y-m-d H:i" }}</p>
                     </div>
-                </div>
-                {% if app.status == 'pending' %}
-                <div class="mt-5">
-                    <a href="{% url 'update_application_status' app.id %}" class="btn-secondary">Change status</a>
+                </button>
+                {% if item.app.status == 'pending' %}
+                <div class="px-6 pb-5">
+                    <a href="{% url 'update_application_status' item.app.id %}" class="btn-secondary">Change status</a>
                 </div>
                 {% endif %}
-            </article>
+
+                <div id="row-{{ forloop.counter }}" class="hidden border-t border-[#E5E7EB] bg-[#F9FAFB] p-6">
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <div>
+                            <p class="text-sm font-semibold text-[#374151] mb-2">Matching skills</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for skill in item.matched_skills %}
+                                    <span class="badge badge-soft">{{ skill }}</span>
+                                {% empty %}
+                                    <p class="text-sm text-[#6B7280]">No matching skills</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-[#374151] mb-2">Full profile</p>
+                            <div class="flex flex-wrap gap-1">
+                                {% for skill in item.app.student.skills|split_skills %}
+                                    <span class="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-medium px-2 py-0.5 rounded-full">{{ skill }}</span>
+                                {% empty %}
+                                    <p class="text-sm text-[#6B7280]">No skills registered</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if item.app.student.cv_pdf %}
+                        <div class="lg:col-span-2">
+                            <a href="{{ item.app.student.cv_pdf.url }}" target="_blank" class="btn-secondary">View CV</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         {% endfor %}
     </div>
     {% else %}
@@ -53,4 +81,11 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+function toggleRow(id) {
+    const row = document.getElementById(id);
+    if (row) row.classList.toggle('hidden');
+}
+</script>
 {% endblock %}

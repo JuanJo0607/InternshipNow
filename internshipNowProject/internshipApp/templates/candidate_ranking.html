@@ -26,7 +26,8 @@
                     <div>
                         <p class="text-xs uppercase tracking-[0.3em] text-[#9CA3AF]">Candidate {{ forloop.counter }}</p>
                         <h2 class="mt-2 text-xl font-semibold text-[#111827]">{{ item.student.user.get_full_name|default:item.student.user.username }}</h2>
-                        <p class="mt-2 text-sm text-[#6B7280]">{{ item.student.career }}</p>
+                        <p class="mt-0.5 text-xs text-[#9CA3AF]">@{{ item.student.user.username }}{% if item.student.cedula %} · ID: {{ item.student.cedula }}{% endif %}</p>
+                        <p class="mt-1 text-sm text-[#6B7280]">{{ item.student.career }}</p>
                     </div>
                     <div class="flex flex-col items-end gap-2">
                         <span class="badge badge-soft">{{ item.score_label }}</span>

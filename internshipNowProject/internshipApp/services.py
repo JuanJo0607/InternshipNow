@@ -15,6 +15,8 @@ def is_profile_complete(user):
         return {'complete': False, 'missing_fields': ['profile']}
 
     missing = []
+    if not profile.cedula.strip():
+        missing.append('national ID')
     if not profile.cv_pdf:
         missing.append('cv')
     if not profile.bio.strip():

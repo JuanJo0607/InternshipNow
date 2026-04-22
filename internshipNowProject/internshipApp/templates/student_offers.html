@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load internship_filters %}
 
 {% block title %}Offers{% endblock %}
 
@@ -42,7 +43,7 @@
                 class="input-field flex flex-wrap gap-1 min-h-[44px] cursor-text"
                 onclick="document.getElementById('skills-tag-input').focus()">
             </div>
-            <input type="text" id="skills-tag-input" placeholder="Añadir habilidad..."
+            <input type="text" id="skills-tag-input" placeholder="Add a skill..."
                 autocomplete="off"
                 class="mt-1 w-full border-0 outline-none text-sm text-[#374151] bg-transparent px-1" />
             <ul id="skill-dropdown" class="absolute z-10 w-full bg-white border border-[#E5E7EB] rounded-2xl shadow-lg max-h-48 overflow-y-auto hidden"></ul>
@@ -65,8 +66,8 @@
                             <span class="bg-[#F3F4F6] text-[#374151] text-xs font-medium px-2.5 py-1 rounded-full">{{ item.offer.location }}</span>
                             <span class="bg-[#F3F4F6] text-[#374151] text-xs font-medium px-2.5 py-1 rounded-full">{{ item.offer.get_modality_display }}</span>
                             {% if item.offer.salary %}<span class="bg-[#ECFDF5] text-[#065F46] text-xs font-medium px-2.5 py-1 rounded-full">{{ item.offer.salary }}</span>{% endif %}
-                            {% for skill in item.offer.desired_skills.split %}
-                                <span class="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-medium px-2.5 py-1 rounded-full">{{ skill|cut:"," }}</span>
+                            {% for skill in item.offer.desired_skills|split_skills %}
+                                <span class="bg-[#EFF6FF] text-[#1D4ED8] text-xs font-medium px-2.5 py-1 rounded-full">{{ skill }}</span>
                             {% endfor %}
                         </div>
                     </div>
