@@ -145,7 +145,7 @@ def register(request):
             if user.role == 'student':
                 cedula = form.cleaned_data.get('cedula', '')
                 StudentProfile.objects.create(user=user, cedula=cedula)
-                return redirect('student_profile')
+                return redirect('student_offers')
             elif user.role == 'company':
                 CompanyProfile.objects.create(user=user)
                 return redirect('company_profile')
@@ -173,7 +173,7 @@ def custom_login(request):
                     messages.warning(request, f"Your profile is incomplete. Missing: {missing}. Please complete it to improve your opportunities.")
 
             if user.role == 'student':
-                return redirect('student_profile')
+                return redirect('student_offers')
             elif user.role == 'company':
                 return redirect('company_profile')
 
@@ -478,6 +478,13 @@ def matching_offers(request):
 def mark_all_notifications_read(request):
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+
+@login_required
+@require_POST
+def delete_notification(request, notification_id):
+    Notification.objects.filter(id=notification_id, user=request.user).delete()
+    return JsonResponse({'status': 'ok'})
 
 
 def create_preselection_notification(user, vacancy_title, match_percentage):
