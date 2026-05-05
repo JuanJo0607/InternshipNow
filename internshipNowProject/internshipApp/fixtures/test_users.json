@@ -1,6 +1,6 @@
 [
 {
-    "model": "internshipApp.user",
+    "model": "accounts.user",
     "pk": 1,
     "fields": {
         "password": "pbkdf2_sha256$1200000$fUSArCIeH6lCCvjvFv2Okl$6fvo7LpkSkZfxafjh4P8KLyJLlR9i1DPziIkT62RLfk=",
@@ -19,7 +19,7 @@
     }
 },
 {
-    "model": "internshipApp.user",
+    "model": "accounts.user",
     "pk": 6,
     "fields": {
         "password": "pbkdf2_sha256$1200000$rM7PBNXgea8wmZIwbAdHzp$E8vpZvJtdAAw49HIvLIYAlNlhwD6A/Ce4IXj3uXOMrQ=",
@@ -38,7 +38,7 @@
     }
 },
 {
-    "model": "internshipApp.user",
+    "model": "accounts.user",
     "pk": 7,
     "fields": {
         "password": "pbkdf2_sha256$1200000$CyjT2NHjTpSLYRy1ttDZi1$rZs32DPDzZuo800bPQUQubRKfGZs8sjnGdvha5RXgio=",
@@ -57,7 +57,7 @@
     }
 },
 {
-    "model": "internshipApp.studentprofile",
+    "model": "accounts.studentprofile",
     "pk": 3,
     "fields": {
         "user": 6,
@@ -71,7 +71,7 @@
     }
 },
 {
-    "model": "internshipApp.companyprofile",
+    "model": "accounts.companyprofile",
     "pk": 3,
     "fields": {
         "user": 7,

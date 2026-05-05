@@ -1,4 +1,8 @@
-from .models import StudentProfile
+from accounts.models import StudentProfile
+from applications.models import InternshipApplication
+from offers.models import InternshipOffer, InternshipOfferView
+from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
+
 
 def is_profile_complete(user):
     """
@@ -28,9 +32,6 @@ def is_profile_complete(user):
         'complete': len(missing) == 0,
         'missing_fields': missing
     }
-from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
-
-from .models import InternshipApplication, InternshipOffer, InternshipOfferView
 
 
 def _apply_period_filter(queryset, date_field, filters):

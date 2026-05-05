@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication
+from accounts.models import User, StudentProfile, CompanyProfile
+from offers.models import InternshipOffer
+from applications.models import InternshipApplication
 
 class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(max_length=150, required=True, label='First name')

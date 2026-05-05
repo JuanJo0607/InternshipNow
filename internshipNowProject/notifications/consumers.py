@@ -7,20 +7,20 @@ from .models import Notification
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope["user"]
-        
+
         if not self.user.is_authenticated:
             await self.close()
             return
-        
+
         self.room_group_name = f"notifications_{self.user.id}"
-        
+
         await self.channel_layer.group_add(
-            self.room_group_name, 
+            self.room_group_name,
             self.channel_name
         )
-        
+
         await self.accept()
-        
+
         unread_count = await self.get_unread_notifications()
         await self.send(text_data=json.dumps({
             "type": "initial_count",
@@ -30,7 +30,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         if self.user.is_authenticated:
             await self.channel_layer.group_discard(
-                self.room_group_name, 
+                self.room_group_name,
                 self.channel_name
             )
 
@@ -52,9 +52,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         title = event.get("title")
         message = event.get("message")
         created_at = event.get("created_at")
-        
+
         unread_count = await self.get_unread_notifications()
-        
+
         await self.send(text_data=json.dumps({
             "type": "new_notification",
             "notification_id": notification_id,

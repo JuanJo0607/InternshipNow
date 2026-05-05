@@ -32,10 +32,6 @@ def annotate_offers_with_score(offers, student_skills_text: str) -> list[dict]:
     Recibe un queryset de InternshipOffer y el texto de habilidades del
     estudiante. Retorna una lista de dicts con la oferta y su score,
     ordenada de mayor a menor compatibilidad.
-
-    Uso en views.py:
-        from .matching import annotate_offers_with_score
-        ranked = annotate_offers_with_score(offers, profile.skills)
     """
     result = []
     for offer in offers:
@@ -51,25 +47,26 @@ def annotate_offers_with_score(offers, student_skills_text: str) -> list[dict]:
     result.sort(key=lambda x: x['score'], reverse=True)
     return result
 
+
 def get_suggestions(offers, student_skills_text: str, student_career: str) -> dict:
     """
     US-12 – Lógica principal de sugerencias personalizadas.
- 
+
     Caso 1 – El estudiante TIENE habilidades:
         Retorna las ofertas con score > 0, ordenadas de mayor a menor.
- 
+
     Caso 2 – El estudiante NO tiene habilidades:
         Retorna las 5 ofertas más recientes cuyo título, descripción o
         requirements contengan alguna palabra clave de su carrera.
         Si no hay coincidencias por carrera, retorna las 5 más recientes.
- 
+
     Retorna un dict con:
         - 'ranked_offers': lista de dicts (igual formato que annotate_offers_with_score)
         - 'mode': 'skills' | 'career' | 'recent'
         - 'career': carrera del estudiante (para mostrar en el template)
     """
     has_skills = bool(normalize_skills(student_skills_text))
- 
+
     if has_skills:
         ranked = annotate_offers_with_score(offers, student_skills_text)
         matched = [r for r in ranked if r['score'] >= 50]
@@ -78,22 +75,22 @@ def get_suggestions(offers, student_skills_text: str, student_career: str) -> di
             'mode': 'skills',
             'career': student_career,
         }
- 
+
     # Sin habilidades: buscar por carrera
     career_keywords = [w.strip().lower() for w in student_career.split() if len(w.strip()) > 3]
- 
+
     career_offers = []
     recent_offers = list(offers.order_by('-created_at'))
- 
+
     if career_keywords:
         for offer in recent_offers:
             text = f"{offer.title} {offer.description} {offer.requirements}".lower()
             if any(kw in text for kw in career_keywords):
                 career_offers.append(offer)
- 
+
     fallback_offers = career_offers[:5] if career_offers else recent_offers[:5]
     mode = 'career' if career_offers else 'recent'
- 
+
     ranked = []
     for offer in fallback_offers:
         ranked.append({
@@ -103,7 +100,7 @@ def get_suggestions(offers, student_skills_text: str, student_career: str) -> di
             'score_color': 'bg-blue-100 text-blue-800',
             'score_color_bar': 'bg-blue-300',
         })
- 
+
     return {
         'ranked_offers': ranked,
         'mode': mode,
@@ -133,6 +130,7 @@ def _score_color(score: int) -> str:
     else:
         return 'bg-gray-100 text-gray-500'
 
+
 def _score_color_bar(score: int) -> str:
     """Clase Tailwind para la barra de progreso."""
     if score >= 80:
@@ -143,7 +141,7 @@ def _score_color_bar(score: int) -> str:
         return 'bg-orange-400'
     else:
         return 'bg-gray-300'
-    
+
 
 def rank_candidates_for_offer(offer, students) -> list[dict]:
     """
@@ -152,14 +150,6 @@ def rank_candidates_for_offer(offer, students) -> list[dict]:
     Recibe una InternshipOffer y un queryset de StudentProfile.
     Retorna una lista de dicts ordenada de mayor a menor score,
     incluyendo solo estudiantes con score > 0.
-
-    Cada dict contiene:
-        - 'student': instancia de StudentProfile
-        - 'score': int 0-100
-        - 'score_label': str
-        - 'score_color': clases Tailwind para badge
-        - 'score_color_bar': clase Tailwind para barra
-        - 'matched_skills': set de skills en común
     """
     result = []
     offer_skills = normalize_skills(offer.desired_skills)

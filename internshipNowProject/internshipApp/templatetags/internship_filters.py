@@ -1,10 +1,2 @@
-from django import template
-
-register = template.Library()
-
-
-@register.filter
-def split_skills(value):
-    if not value:
-        return []
-    return [s.strip() for s in value.split(',') if s.strip()]
+# Moved to core/templatetags/internship_filters.py
+# This file is kept empty to avoid breaking any cached .pyc imports.

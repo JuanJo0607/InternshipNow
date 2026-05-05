@@ -2,19 +2,18 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm, StudentCVForm, ApplicationStatusForm
-from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication, Notification
+from accounts.models import StudentProfile, CompanyProfile
+from offers.models import InternshipOffer, InternshipOfferView
+from applications.models import InternshipApplication
+from notifications.models import Notification
+from analytics.services import getViewsVsApplicationsPerJob, getAverageTimeToClose, getCandidatesByStatus, is_profile_complete
+from matching.matching_logic import annotate_offers_with_score, get_suggestions, rank_candidates_for_offer
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
 from django.utils import timezone
-from .forms import CustomUserCreationForm, StudentProfileForm, CompanyProfileForm, InternshipOfferForm, StudentCVForm, ApplicationStatusForm
-from .models import StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication, InternshipOfferView
-from .services import getViewsVsApplicationsPerJob, getAverageTimeToClose, getCandidatesByStatus
 from django.contrib.auth import authenticate, login
-from .matching import annotate_offers_with_score, get_suggestions, rank_candidates_for_offer
 from django.core.mail import send_mail
 from django.conf import settings
 from django.views.decorators.http import require_POST
-from .services import is_profile_complete
 
 
 @login_required
@@ -351,7 +350,7 @@ def company_applications(request):
     if request.user.role != 'company':
         return redirect('home')
     profile = CompanyProfile.objects.get(user=request.user)
-    from .matching import normalize_skills, _score_label, _score_color
+    from matching.matching_logic import normalize_skills, _score_label, _score_color
     raw_apps = InternshipApplication.objects.filter(
         offer__company=profile
     ).select_related('student__user', 'offer').order_by('-applied_at')

@@ -22,6 +22,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'internshipApp',
+    'accounts',
+    'offers',
+    'applications',
+    'notifications',
+    'matching',
+    'analytics',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -46,7 +53,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'internshipApp.context_processors.notification_context',
+                'notifications.context_processors.notification_context',
             ],
         },
     },
@@ -77,7 +84,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-AUTH_USER_MODEL = 'internshipApp.User'
+AUTH_USER_MODEL = 'accounts.User'
 
 LOGOUT_REDIRECT_URL = '/login/'
 
@@ -88,10 +95,6 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'no-reply@internshipnow.local'
-
-AUTH_USER_MODEL = 'internshipApp.User' 
-
-LOGOUT_REDIRECT_URL = '/login/'
 
 ASGI_APPLICATION = 'internshipNow.asgi.application'
 

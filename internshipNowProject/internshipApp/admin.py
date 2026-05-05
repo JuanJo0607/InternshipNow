@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import User, StudentProfile, CompanyProfile, InternshipOffer, InternshipApplication, InternshipOfferView
+from accounts.models import User, StudentProfile, CompanyProfile
+from offers.models import InternshipOffer, InternshipOfferView
+from applications.models import InternshipApplication
 
 admin.site.register(User)
 admin.site.register(StudentProfile)
