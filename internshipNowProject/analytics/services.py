@@ -7,7 +7,8 @@ from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
 def is_profile_complete(user):
     """
     Verifica si el perfil del estudiante está completo.
-    Campos obligatorios: cv_pdf, bio, skills.
+    Campos obligatorios: first_name, last_name, national ID, career, bio, skills.
+    El CV no se considera obligatorio aquí — el usuario lo sube desde la sección Curriculum.
     Retorna un dict con 'complete' (bool) y 'missing_fields' (list).
     """
     if user.role != 'student':
@@ -19,10 +20,14 @@ def is_profile_complete(user):
         return {'complete': False, 'missing_fields': ['profile']}
 
     missing = []
+    if not user.first_name.strip():
+        missing.append('first name')
+    if not user.last_name.strip():
+        missing.append('last name')
     if not profile.cedula.strip():
         missing.append('national ID')
-    if not profile.cv_pdf:
-        missing.append('cv')
+    if not profile.career.strip():
+        missing.append('career')
     if not profile.bio.strip():
         missing.append('bio')
     if not profile.skills.strip():

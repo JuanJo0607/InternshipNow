@@ -15,9 +15,17 @@
                     Real talent for real opportunities in a clean, clear, and professional experience. Simplify vacancy management and receive applications in one place.
                 </p>
 
-                <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <a href="{% url 'login' %}" class="btn-primary w-full sm:w-auto">I'm a Student</a>
-                    <a href="{% url 'login' %}" class="btn-secondary w-full sm:w-auto">I'm a Company</a>
+                <div class="mt-6 inline-flex items-center gap-3 rounded-full border border-[#E5E7EB] bg-white px-4 py-2 shadow-sm">
+                    <span class="flex h-2 w-2 rounded-full bg-green-400 ring-4 ring-green-400/20"></span>
+                    <p class="text-sm text-[#374151]">
+                        New here? Join for free —
+                        <a href="{% url 'login' %}" class="font-semibold text-[#111827] underline underline-offset-2 hover:text-[#374151] transition-colors">already have an account?</a>
+                    </p>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+                    <a href="{% url 'register' %}" class="btn-primary w-full sm:w-auto">I'm a Student</a>
+                    <a href="{% url 'register' %}" class="btn-secondary w-full sm:w-auto">I'm a Company</a>
                 </div>
             </div>
 

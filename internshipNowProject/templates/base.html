@@ -223,8 +223,8 @@
 </head>
 <body class="min-h-screen bg-[#F3F4F6]">
     <header class="bg-white border-b border-[#E5E7EB]">
-        <div class="container mx-auto flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between">
-            <a href="{% url 'home' %}" class="flex items-center gap-3 text-[#000000]">
+        <div class="w-full max-w-screen-2xl mx-auto flex flex-col gap-4 px-4 sm:px-6 lg:px-8 py-4 md:flex-row md:items-center md:justify-between">
+            <a href="{% if user.is_authenticated %}{% if user.role == 'student' %}{% url 'student_offers' %}{% else %}{% url 'company_offers' %}{% endif %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-3 text-[#000000]">
                 <span class="logo-mark">
                     <img src="{% static 'images/logo.svg' %}" alt="InternshipNow logo" class="h-12 w-12 object-contain" />
                 </span>
@@ -297,7 +297,7 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-10">
+    <main class="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {% if messages %}
             <div class="mb-6 space-y-4">
                 {% for message in messages %}
@@ -311,7 +311,7 @@
     </main>
 
     <footer class="border-t border-[#E5E7EB] bg-white">
-        <div class="container mx-auto px-4 py-6 text-center footer-minimal">
+        <div class="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center footer-minimal">
             <p class="font-semibold">InternshipNow</p>
             <p class="mt-2">© {{ now|date:"Y" }} InternshipNow. All rights reserved.</p>
         </div>
