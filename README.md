@@ -36,17 +36,9 @@ python manage.py loaddata job_offers.json
 
 | Username | Password | Role | Notes |
 |---|---|---|---|
-| `juandev` | `juandev123` | Admin | Superuser — access Django admin at `/admin/` |
+| `admin` | `admin` | Admin | Superuser — access Django admin at `/admin/` |
 | `student_test` | `student123` | Student | Has a `StudentProfile` with skills in Python, Django, SQL, React.js, ML, Git, Docker, Figma |
 | `company_test` | `company123` | Company | Has a `CompanyProfile` for **CloudStream Analytics** (IT & Services) |
-
-> Passwords above are the originals used when the fixtures were generated. If they no longer work, create new users manually or reset via `python manage.py changepassword <username>`.
-
-### Job Offers
-
-10 internship offers published by `company_test` (CloudStream Analytics), covering:
-Backend, Frontend, Data Science, AI Research, Full Stack, DevOps, Mobile, Cybersecurity, UX/UI Design, and Data Engineering.
-All offers are `status: open` and span modalities: `virtual`, `presencial`, and `hibrido`.
 
 ### Loading fixtures
 
