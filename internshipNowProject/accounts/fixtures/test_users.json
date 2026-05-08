@@ -1,0 +1,83 @@
+[
+{
+    "model": "accounts.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$1200000$fUSArCIeH6lCCvjvFv2Okl$6fvo7LpkSkZfxafjh4P8KLyJLlR9i1DPziIkT62RLfk=",
+        "last_login": "2026-03-09T22:31:04.410Z",
+        "is_superuser": true,
+        "username": "juandev",
+        "first_name": "",
+        "last_name": "",
+        "email": "juan.restrepo023@gmail.com",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2026-02-12T23:47:29.773Z",
+        "role": "",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "accounts.user",
+    "pk": 6,
+    "fields": {
+        "password": "pbkdf2_sha256$1200000$rM7PBNXgea8wmZIwbAdHzp$E8vpZvJtdAAw49HIvLIYAlNlhwD6A/Ce4IXj3uXOMrQ=",
+        "last_login": "2026-03-09T22:25:29Z",
+        "is_superuser": false,
+        "username": "student_test",
+        "first_name": "",
+        "last_name": "",
+        "email": "student@test.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2026-03-09T22:17:30Z",
+        "role": "student",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "accounts.user",
+    "pk": 7,
+    "fields": {
+        "password": "pbkdf2_sha256$1200000$CyjT2NHjTpSLYRy1ttDZi1$rZs32DPDzZuo800bPQUQubRKfGZs8sjnGdvha5RXgio=",
+        "last_login": "2026-03-09T22:24:19Z",
+        "is_superuser": false,
+        "username": "company_test",
+        "first_name": "",
+        "last_name": "",
+        "email": "company@test.com",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2026-03-09T22:18:02Z",
+        "role": "company",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "accounts.studentprofile",
+    "pk": 3,
+    "fields": {
+        "user": 6,
+        "cedula": "",
+        "university": "Stanford University",
+        "career": "Computer Science & Artificial Intelligence",
+        "skills": "Python, Django, SQL, React.js, Machine Learning, Git, Docker, Figma",
+        "bio": "Passionate junior-year student with a focus on building accessible and scalable web applications. I have experience working on open-source projects and love solving complex algorithmic challenges. Currently looking for a summer internship where I can apply my full-stack development skills and learn from industry leaders in the tech space.",
+        "is_verified": false,
+        "cv_pdf": null
+    }
+},
+{
+    "model": "accounts.companyprofile",
+    "pk": 3,
+    "fields": {
+        "user": 7,
+        "company_name": "CloudStream Analytics",
+        "industry": "Information Technology & Services",
+        "description": "CloudStream Analytics provides real-time data visualization tools for remote teams. Our platform integrates seamlessly with existing workflows to transform raw data into actionable insights, helping businesses scale efficiently in a digital-first world."
+    }
+}
+]
