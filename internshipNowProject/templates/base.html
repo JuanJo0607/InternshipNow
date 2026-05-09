@@ -222,8 +222,8 @@
     </style>
 </head>
 <body class="min-h-screen bg-[#F3F4F6]">
-    <header class="bg-white border-b border-[#E5E7EB]">
-        <div class="w-full max-w-screen-2xl mx-auto flex flex-col gap-4 px-4 sm:px-6 lg:px-8 py-4 md:flex-row md:items-center md:justify-between">
+    <header class="bg-white border-b border-[#E5E7EB] w-full">
+        <div class="w-full flex flex-col gap-4 px-4 sm:px-6 lg:px-8 py-4 md:flex-row md:items-center md:justify-between">
             <a href="{% if user.is_authenticated %}{% if user.role == 'student' %}{% url 'student_offers' %}{% else %}{% url 'company_offers' %}{% endif %}{% else %}{% url 'home' %}{% endif %}" class="flex items-center gap-3 text-[#000000]">
                 <span class="logo-mark">
                     <img src="{% static 'images/logo.svg' %}" alt="InternshipNow logo" class="h-12 w-12 object-contain" />
@@ -273,22 +273,40 @@
                         </div>
                     </div>
 
-                    <span class="inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F3F4F6] px-3 py-2 text-sm font-medium text-[#000000]">
-                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#F3F4F6] text-[#000000]">👤</span>
-                        {{ user.role|default:"User"|title }}
-                    </span>
-                    {% if user.role == 'company' %}
-                        <a href="{% url 'company_profile' %}" class="btn-secondary">My profile</a>
-                    {% else %}
-                        <a href="{% url 'student_profile' %}" class="btn-secondary">My profile</a>
-                    {% endif %}
-                    <form action="{% url 'logout' %}" method="post" class="inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-secondary inline-flex items-center gap-2">
-                            Logout
-                            <span aria-hidden="true">→</span>
+                    <div class="relative group">
+                        <button id="userDropdownBtn" type="button" class="inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-[#F3F4F6] px-3 py-2 text-sm font-medium text-[#000000] focus:outline-none">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#F3F4F6] text-[#000000]">👤</span>
+                            {{ user.role|default:"User"|title }}
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
-                    </form>
+                        <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-lg ring-1 ring-[#E5E7EB] focus:outline-none z-50 overflow-hidden group-focus-within:block group-hover:block">
+                            {% if user.role == 'company' %}
+                                <a href="{% url 'company_profile' %}" class="block px-4 py-3 text-sm text-[#111827] hover:bg-[#F3F4F6]">My profile</a>
+                            {% else %}
+                                <a href="{% url 'student_profile' %}" class="block px-4 py-3 text-sm text-[#111827] hover:bg-[#F3F4F6]">My profile</a>
+                            {% endif %}
+                            <form action="{% url 'logout' %}" method="post" class="block px-4 py-3">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full text-left text-sm text-[#111827] hover:bg-[#F3F4F6]">Logout <span aria-hidden="true">→</span></button>
+                            </form>
+                        </div>
+                    </div>
+                    <script>
+                    // Dropdown for user menu
+                    const userDropdownBtn = document.getElementById('userDropdownBtn');
+                    const userDropdownMenu = document.getElementById('userDropdownMenu');
+                    if (userDropdownBtn && userDropdownMenu) {
+                        userDropdownBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            userDropdownMenu.classList.toggle('hidden');
+                        });
+                        document.addEventListener('click', function(e) {
+                            if (!userDropdownMenu.classList.contains('hidden')) {
+                                userDropdownMenu.classList.add('hidden');
+                            }
+                        });
+                    }
+                    </script>
                 {% else %}
                     <a href="{% url 'login' %}" class="btn-secondary">Log in</a>
                     <a href="{% url 'register' %}" class="btn-primary">Register</a>

@@ -4,6 +4,26 @@
 
 {% block content %}
 <div class="max-w-6xl mx-auto space-y-8">
+    {# Incomplete profile banner #}
+    {% if profile_missing and profile_percent < 100 %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-xl flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
+        <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"/></svg>
+                <span class="font-semibold text-yellow-800">Complete your profile to improve your opportunities!</span>
+            </div>
+            <div class="w-full bg-yellow-100 rounded-full h-2 mb-2">
+                <div class="h-2 rounded-full bg-yellow-400 transition-all duration-300" style="width: {{ profile_percent }}%;"></div>
+            </div>
+            <p class="text-yellow-800 text-sm mb-1">{{ dynamic_message }}</p>
+            <ul class="text-yellow-700 text-xs mb-2 flex flex-wrap gap-2">
+                {% for field in profile_missing %}
+                    <li class="bg-yellow-100 px-2 py-1 rounded">{{ field }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
     <section class="card p-8">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -38,15 +58,16 @@
                             </div>
                             <p class="text-sm text-[#6B7280]">Add skills to improve your match with offers.</p>
                         </div>
-                    {% elif field.name == 'career' %}
+                    {% elif field.name == 'careers' %}
                         <div class="flex flex-col gap-2">
                             <label class="form-label">{{ field.label }}</label>
-                            <input type="hidden" name="career" id="career-hidden" value="{{ profile.career }}">
+                            <input type="hidden" name="careers" id="careers-hidden" value="{{ profile_careers_str }}">
+                            <div id="careers-container" class="min-h-[56px] flex flex-wrap gap-2 rounded-2xl border border-[#E5E7EB] bg-white p-3 cursor-text"></div>
                             <div class="relative">
-                                <input id="career-input" type="text" placeholder="Type your major" autocomplete="off" class="input-field" value="{{ profile.career }}" />
-                                <ul id="career-dropdown" class="absolute z-10 w-full bg-white border border-[#E5E7EB] rounded-2xl shadow-lg max-h-48 overflow-y-auto hidden"></ul>
+                                <input id="careers-input" type="text" placeholder="Add your career(s)" autocomplete="off" class="input-field" />
+                                <ul id="careers-dropdown" class="absolute z-10 w-full bg-white border border-[#E5E7EB] rounded-2xl shadow-lg max-h-48 overflow-y-auto hidden"></ul>
                             </div>
-                            <p class="text-sm text-[#6B7280]">Select your major from the list.</p>
+                            <p class="text-sm text-[#6B7280]">Select one or more careers that match your profile.</p>
                         </div>
                     {% elif field.name == 'university' %}
                         <div class="flex flex-col gap-2">
@@ -190,86 +211,95 @@ profileSkillsContainer.addEventListener('click', () => profileSkillsInput.focus(
 renderProfileSkillTags();
 // ...existing code...
 </script>
+{{ careers_data|json_script:"careers-data" }}
 <script>
 const UNIVERSITIES = [
     "Universidad EAFIT"
 ];
 
-const CAREERS = [
-    "Ingeniería Agronómica",
-    "Ingeniería Civil",
-    "Ingeniería de Diseño de Producto",
-    "Ingeniería de Procesos",
-    "Ingeniería de Producción",
-    "Ingeniería de Sistemas",
-    "Ingeniería Física",
-    "Ingeniería Matemática",
-    "Ingeniería Mecánica",
-    "Geociencias",
-    "Biología",
-    "Administración de Negocios",
-    "Contaduría Pública",
-    "Economía",
-    "Finanzas",
-    "Mercadeo",
-    "Negocios Internacionales",
-    "Derecho",
-    "Ciencias Políticas",
-    "Comunicación Social",
-    "Psicología",
-    "Música",
-    "Diseño Urbano y Gestión del Hábitat",
-    "Artes (Plásticas)"
-];
+const CAREERS = JSON.parse(document.getElementById('careers-data').textContent).map(c => c.name);
 
 const universityInput = document.getElementById('university-input');
 const universityHidden = document.getElementById('university-hidden');
 const universityDropdown = document.getElementById('university-dropdown');
 let universityHighlight = -1;
 
-const careerInput = document.getElementById('career-input');
-const careerHidden = document.getElementById('career-hidden');
-const careerDropdown = document.getElementById('career-dropdown');
-let careerHighlight = -1;
+const careersContainer = document.getElementById('careers-container');
+const careersInput = document.getElementById('careers-input');
+const careersHidden = document.getElementById('careers-hidden');
+const careersDropdown = document.getElementById('careers-dropdown');
 
-function showCareerOptions(value) {
-    const filtered = CAREERS.filter(c => c.toLowerCase().includes(value.toLowerCase()));
-    if (!filtered.length) { hideCareerOptions(); return; }
-    careerHighlight = -1;
-    careerDropdown.innerHTML = '';
-    filtered.forEach(option => {
-        const li = document.createElement('li');
-        li.className = 'px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] text-sm text-[#374151]';
-        li.textContent = option;
-        li.addEventListener('mousedown', e => { e.preventDefault(); selectCareer(option); });
-        careerDropdown.appendChild(li);
+// Store careers as name-based tags but maintain IDs for form submission
+let careersNames = careersHidden.value ? careersHidden.value.split(',').map(c => c.trim()).filter(Boolean) : [];
+let careersHighlight = -1;
+
+function renderCareerTags() {
+    careersContainer.innerHTML = '';
+    careersNames.forEach((name, index) => {
+        const pill = document.createElement('span');
+        pill.className = 'inline-flex items-center gap-2 rounded-full bg-[#F3F4F6] px-3 py-1 text-sm text-[#374151]';
+        pill.innerHTML = `${name}<button type="button" onclick="removeCareer(${index})" class="text-[#374151]/80 hover:text-[#000000]">✕</button>`;
+        careersContainer.appendChild(pill);
     });
-    careerDropdown.classList.remove('hidden');
+    // Update the hidden field with names (Django form will handle the lookup)
+    careersHidden.value = careersNames.join(',');
 }
 
-function hideCareerOptions() {
-    careerDropdown.classList.add('hidden');
-    careerHighlight = -1;
-}
-
-function selectCareer(value) {
-    careerInput.value = value;
-    careerHidden.value = value;
+function addCareer(value) {
+    const career = value.trim();
+    if (!career) return;
+    const match = CAREERS.find(c => c.toLowerCase() === career.toLowerCase());
+    if (!match) return;
+    if (!careersNames.map(c => c.toLowerCase()).includes(match.toLowerCase())) {
+        careersNames.push(match);
+        renderCareerTags();
+    }
+    careersInput.value = '';
     hideCareerOptions();
 }
 
-careerInput && careerInput.addEventListener('input', function(e) {
-    showCareerOptions(e.target.value);
-    careerHidden.value = e.target.value;
-});
+function removeCareer(index) {
+    careersNames.splice(index, 1);
+    renderCareerTags();
+}
 
-careerInput && careerInput.addEventListener('focus', function(e) {
-    showCareerOptions(e.target.value || '');
-});
+function showCareerOptions(query) {
+    const filtered = CAREERS.filter(c => c.toLowerCase().includes(query.toLowerCase()) && !careersNames.map(t => t.toLowerCase()).includes(c.toLowerCase())).slice(0, 8);
+    if (!filtered.length || !query) { hideCareerOptions(); return; }
+    careersHighlight = -1;
+    careersDropdown.innerHTML = '';
+    filtered.forEach(career => {
+        const li = document.createElement('li');
+        li.className = 'px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] text-sm text-[#374151]';
+        li.textContent = career;
+        li.addEventListener('mousedown', e => { e.preventDefault(); addCareer(career); });
+        careersDropdown.appendChild(li);
+    });
+    careersDropdown.classList.remove('hidden');
+}
 
-careerInput && careerInput.addEventListener('blur', function() {
-    setTimeout(hideCareerOptions, 100);
+function hideCareerOptions() {
+    careersDropdown.classList.add('hidden');
+    careersHighlight = -1;
+}
+
+function updateCareerHighlight() {
+    [...careersDropdown.querySelectorAll('li')].forEach((li, i) => {
+        li.classList.toggle('bg-[#E5E7EB]', i === careersHighlight);
+    });
+}
+
+careersInput.addEventListener('input', function() { showCareerOptions(this.value); });
+careersInput.addEventListener('keydown', function(e) {
+    const items = [...careersDropdown.querySelectorAll('li')];
+    if (e.key === 'ArrowDown') { e.preventDefault(); careersHighlight = Math.min(careersHighlight + 1, items.length - 1); updateCareerHighlight(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); careersHighlight = Math.max(careersHighlight - 1, 0); updateCareerHighlight(); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (careersHighlight >= 0 && items[careersHighlight]) { addCareer(items[careersHighlight].textContent); } else { addCareer(this.value); } }
+    else if (e.key === 'Escape') { hideCareerOptions(); }
 });
+careersInput.addEventListener('blur', () => setTimeout(hideCareerOptions, 150));
+careersContainer.addEventListener('click', () => careersInput.focus());
+renderCareerTags();
 
 function showUniversityOptions(value) {
     const filtered = UNIVERSITIES.filter(u => u.toLowerCase().includes(value.toLowerCase())).slice(0, 8);

@@ -3,6 +3,7 @@ from accounts.models import CompanyProfile, StudentProfile
 
 
 class InternshipOffer(models.Model):
+    careers = models.ManyToManyField('accounts.Career', related_name='offers')
     STATUS_CHOICES = (
         ('open', 'Open'),
         ('closed', 'Closed'),

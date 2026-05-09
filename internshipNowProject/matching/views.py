@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from accounts.models import StudentProfile
+from accounts.models import Career, StudentProfile
 from offers.models import InternshipOffer
 from applications.models import InternshipApplication
 from matching.matching_logic import get_suggestions
@@ -14,13 +14,13 @@ def matching_offers(request):
     try:
         profile = StudentProfile.objects.get(user=request.user)
         student_skills = profile.skills
-        student_career = profile.career
+        student_careers = profile.careers.all()
     except StudentProfile.DoesNotExist:
         student_skills = ''
-        student_career = ''
+        student_careers = Career.objects.none()
 
     offers = InternshipOffer.objects.filter(status='open')
-    suggestions = get_suggestions(offers, student_skills, student_career)
+    suggestions = get_suggestions(offers, student_skills, student_careers)
 
     applied_ids = list(
         InternshipApplication.objects.filter(student__user=request.user).values_list('offer_id', flat=True)
@@ -29,7 +29,7 @@ def matching_offers(request):
     return render(request, 'matching/matching_offers.html', {
         'ranked_offers': suggestions['ranked_offers'],
         'student_skills': student_skills,
-        'student_career': student_career,
+        'student_careers': student_careers,
         'mode': suggestions['mode'],
         'applied_ids': applied_ids,
     })

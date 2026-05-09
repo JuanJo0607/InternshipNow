@@ -23,6 +23,17 @@
                     </div>
                     <p class="text-sm text-[#6B7280]">Type relevant skills and quickly add tags.</p>
                 </div>
+            {% elif field.name == 'careers' %}
+                <div class="flex flex-col gap-2">
+                    <label class="form-label">{{ field.label }}</label>
+                    <input type="hidden" name="careers" id="careers-hidden" value="{{ offer_careers_str|default:'' }}">
+                    <div id="careers-container" class="flex flex-wrap gap-2 rounded-2xl border border-[#E5E7EB] bg-white p-3 min-h-[56px] cursor-text"></div>
+                    <div class="relative">
+                        <input id="careers-input" type="text" placeholder="Add career" autocomplete="off" class="input-field" />
+                        <ul id="careers-dropdown" class="absolute z-10 w-full bg-white border border-[#E5E7EB] rounded-2xl shadow-lg max-h-48 overflow-y-auto hidden"></ul>
+                    </div>
+                    <p class="text-sm text-[#6B7280]">Select one or more careers for this offer.</p>
+                </div>
             {% else %}
                 <div class="flex flex-col gap-2">
                     <label class="form-label">{{ field.label }}</label>
@@ -34,6 +45,7 @@
     </form>
 </div>
 
+{{ careers_data|json_script:"offer-careers-data" }}
 <script>
 const SKILLS_LIST = [
   "Python","Java","JavaScript","TypeScript","C","C++","C#","Go","Rust","Swift","Kotlin","Ruby","PHP","Scala","R","MATLAB","Perl","Haskell","Dart","Lua","Shell Scripting","Bash","PowerShell",
@@ -55,6 +67,8 @@ const SKILLS_LIST = [
   "Blockchain","Smart Contracts","Solidity","Web3","IoT","Augmented Reality","Virtual Reality","Edge Computing","Quantum Computing",
   "SAP","Salesforce","Microsoft Office","Excel","Power Automate","SharePoint","Dynamics 365"
 ];
+
+const CAREERS_LIST = JSON.parse(document.getElementById('offer-careers-data').textContent).map(c => c.name);
 
 const skillsContainer = document.getElementById('skills-container');
 const skillsInput = document.getElementById('skills-input');
@@ -129,5 +143,86 @@ skillsInput.addEventListener('keydown', function(e) {
 skillsInput.addEventListener('blur', () => setTimeout(hideSkillsDropdown, 150));
 skillsContainer.addEventListener('click', () => skillsInput.focus());
 renderSkillTags();
+
+// Careers tag input
+const careersContainer = document.getElementById('careers-container');
+const careersInput = document.getElementById('careers-input');
+const careersHidden = document.getElementById('careers-hidden');
+const careersDropdown = document.getElementById('careers-dropdown');
+let careersRaw = careersHidden.value || '';
+console.log('careersHidden.value:', careersRaw);
+// If value looks like a Python list string, clean it
+if (careersRaw.startsWith('[') && careersRaw.endsWith(']')) {
+    careersRaw = careersRaw.slice(1, -1).replace(/['"]/g, '');
+}
+let careersNames = careersRaw.split(',').map(c => c.replace(/^[\[\]\'\"\s]+|[\[\]\'\"\s]+$/g, '').trim()).filter(Boolean);
+console.log('careersNames:', careersNames);
+let careersHighlighted = -1;
+
+function renderCareerTags() {
+    careersContainer.innerHTML = '';
+    careersNames.forEach((name, index) => {
+        const pill = document.createElement('span');
+        pill.className = 'inline-flex items-center gap-2 rounded-full bg-[#F3F4F6] px-3 py-1 text-sm text-[#374151]';
+        pill.innerHTML = `${name}<button type="button" onclick="removeCareer(${index})" class="text-[#374151]/80 hover:text-[#000000]">✕</button>`;
+        careersContainer.appendChild(pill);
+    });
+    careersHidden.value = careersNames.join(',');
+}
+
+function addCareer(value) {
+    const career = value.trim();
+    if (!career) return;
+    // Permitir cualquier texto, no solo los de CAREERS_LIST
+    if (!careersNames.map(c => c.toLowerCase()).includes(career.toLowerCase())) {
+        careersNames.push(career);
+        renderCareerTags();
+    }
+    careersInput.value = '';
+    hideCareersDropdown();
+}
+
+function removeCareer(index) {
+    careersNames.splice(index, 1);
+    renderCareerTags();
+}
+
+function showCareersDropdown(query) {
+    const filtered = CAREERS_LIST.filter(c => c.toLowerCase().includes(query.toLowerCase()) && !careersNames.map(t => t.toLowerCase()).includes(c.toLowerCase())).slice(0, 8);
+    if (!filtered.length || !query) { hideCareersDropdown(); return; }
+    careersHighlighted = -1;
+    careersDropdown.innerHTML = '';
+    filtered.forEach(career => {
+        const li = document.createElement('li');
+        li.className = 'px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] text-sm text-[#374151]';
+        li.textContent = career;
+        li.addEventListener('mousedown', e => { e.preventDefault(); addCareer(career); });
+        careersDropdown.appendChild(li);
+    });
+    careersDropdown.classList.remove('hidden');
+}
+
+function hideCareersDropdown() {
+    careersDropdown.classList.add('hidden');
+    careersHighlighted = -1;
+}
+
+function updateCareerHighlight() {
+    [...careersDropdown.querySelectorAll('li')].forEach((li, i) => {
+        li.classList.toggle('bg-[#E5E7EB]', i === careersHighlighted);
+    });
+}
+
+careersInput.addEventListener('input', function() { showCareersDropdown(this.value); });
+careersInput.addEventListener('keydown', function(e) {
+    const items = [...careersDropdown.querySelectorAll('li')];
+    if (e.key === 'ArrowDown') { e.preventDefault(); careersHighlighted = Math.min(careersHighlighted + 1, items.length - 1); updateCareerHighlight(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); careersHighlighted = Math.max(careersHighlighted - 1, 0); updateCareerHighlight(); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (careersHighlighted >= 0 && items[careersHighlighted]) { addCareer(items[careersHighlighted].textContent); } else { addCareer(this.value); } }
+    else if (e.key === 'Escape') { hideCareersDropdown(); }
+});
+careersInput.addEventListener('blur', () => setTimeout(hideCareersDropdown, 150));
+careersContainer.addEventListener('click', () => careersInput.focus());
+renderCareerTags();
 </script>
 {% endblock %}

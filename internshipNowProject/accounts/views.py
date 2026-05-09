@@ -43,9 +43,11 @@ def custom_login(request):
             # US-14: Check profile completeness for students
             if user.role == 'student':
                 profile_status = is_profile_complete(user)
+                # Guardar los campos faltantes en la sesión para el banner de ofertas
+                request.session['profile_missing'] = profile_status['missing_fields']
                 if not profile_status['complete']:
                     missing = ', '.join(profile_status['missing_fields'])
-                    messages.warning(request, f"Your profile is incomplete. Missing: {missing}. Please complete it to improve your opportunities.")
+                    messages.warning(request, f"Tu perfil está incompleto. Faltan: {missing}. Completa tu perfil para mejorar tus oportunidades.")
 
             if user.role == 'student':
                 return redirect('student_offers')
@@ -57,6 +59,8 @@ def custom_login(request):
 
 @login_required
 def student_profile(request):
+    from analytics.services import is_profile_complete
+    from accounts.models import Career
     if request.user.role != 'student':
         return redirect('home')
 
@@ -66,24 +70,53 @@ def student_profile(request):
         # Force university to 'Universidad EAFIT' always
         post_data = request.POST.copy()
         post_data['university'] = 'Universidad EAFIT'
+        post_data['first_name'] = request.POST.get('first_name', '')
+        post_data['last_name'] = request.POST.get('last_name', '')
         form = StudentProfileForm(post_data, instance=profile)
         if form.is_valid():
             form.save()
-            request.user.first_name = form.cleaned_data.get('first_name', '')
-            request.user.last_name = form.cleaned_data.get('last_name', '')
+            request.user.first_name = form.cleaned_data.get('first_name', '') or ''
+            request.user.last_name = form.cleaned_data.get('last_name', '') or ''
             request.user.save(update_fields=['first_name', 'last_name'])
             profile.refresh_from_db()
             profile_status = is_profile_complete(request.user)
-            if not profile_status['complete']:
-                missing = ', '.join(profile_status['missing_fields'])
-                messages.warning(request, f"Your profile is still incomplete. Missing: {missing}. Please complete it to improve your opportunities.")
+            request.session['profile_missing'] = profile_status['missing_fields']
+            # No mostrar mensaje de alerta superior, solo el banner central
     else:
         form = StudentProfileForm(instance=profile, initial={
-            'first_name': request.user.first_name,
-            'last_name': request.user.last_name,
+            'first_name': request.user.first_name or '',
+            'last_name': request.user.last_name or '',
         })
 
-    return render(request, 'accounts/student_profile.html', {'form': form, 'profile': profile})
+    # Banner logic (same as offers)
+    profile_status = is_profile_complete(request.user)
+    profile_missing = profile_status['missing_fields']
+    total_fields = 5
+    missing_count = len(profile_missing)
+    completed_count = total_fields - missing_count
+    profile_percent = round((completed_count / total_fields) * 100) if total_fields > 0 else 0
+    field_map = {
+        'National ID': 'Add your national ID',
+        'Career': 'Complete your career',
+        'Bio': 'Complete your Bio to gain 20% more visibility',
+        'Skills': 'Add your skills',
+        'CV': 'Upload your CV',
+    }
+    dynamic_message = field_map.get(profile_missing[0], 'Complete your profile to improve your opportunities') if profile_missing else ''
+
+    # Get careers as JSON for template (ID and name)
+    profile_careers_str = ', '.join([career.name for career in profile.careers.all()])
+    careers_data = [{'id': c.id, 'name': c.name} for c in Career.objects.all().order_by('name')]
+
+    return render(request, 'accounts/student_profile.html', {
+        'form': form,
+        'profile': profile,
+        'profile_careers_str': profile_careers_str,
+        'careers_data': careers_data,
+        'profile_missing': profile_missing,
+        'profile_percent': profile_percent,
+        'dynamic_message': dynamic_message,
+    })
 
 
 @login_required
@@ -115,6 +148,10 @@ def upload_cv(request):
         form = StudentCVForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
+            # Actualizar los campos faltantes en la sesión
+            from analytics.services import is_profile_complete
+            profile_status = is_profile_complete(request.user)
+            request.session['profile_missing'] = profile_status['missing_fields']
             return redirect('student_profile')
     else:
         form = StudentCVForm(instance=profile)

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
+
+    <h2 class="text-2xl font-bold mb-6">Student Profile</h2>
+
+    <!-- FORM SAVE -->
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="flex flex-col">
+                <label class="mb-1 font-semibold text-gray-700">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+            </div>
+        {% endfor %}
+
+        <button type="submit"
+            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Save
+        </button>
+    </form>
+
+    <!-- LOGOUT -->
+    <form action="{% url 'logout' %}" method="POST" class="mt-4">
+        {% csrf_token %}
+        <button type="submit"
+            class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+            Logout
+        </button>
+    </form>
+
+</div>
+{% endblock %}

@@ -5,6 +5,29 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto space-y-8">
+    {# Banner de perfil incompleto #}
+    {% if profile_missing and profile_percent < 100 %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-xl flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+                <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"/></svg>
+                <span class="font-semibold text-yellow-800">Complete your profile to improve your opportunities!</span>
+            </div>
+            <div class="w-full bg-yellow-100 rounded-full h-2 mb-2">
+                <div class="h-2 rounded-full bg-yellow-400 transition-all duration-300" style="width: {{ profile_percent }}%;"></div>
+            </div>
+            <p class="text-yellow-800 text-sm mb-1">{{ dynamic_message }}</p>
+            <ul class="text-yellow-700 text-xs mb-2 flex flex-wrap gap-2">
+                {% for field in profile_missing %}
+                    <li class="bg-yellow-100 px-2 py-1 rounded">{{ field }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="mt-3 md:mt-0 md:ml-6">
+            <a href="{% url 'student_profile' %}" class="btn-primary">Edit profile</a>
+        </div>
+    </div>
+    {% endif %}
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
             <p class="section-label">Offers</p>
@@ -47,6 +70,17 @@
                 autocomplete="off"
                 class="mt-1 w-full border-0 outline-none text-sm text-[#374151] bg-transparent px-1" />
             <ul id="skill-dropdown" class="absolute z-10 w-full bg-white border border-[#E5E7EB] rounded-2xl shadow-lg max-h-48 overflow-y-auto hidden"></ul>
+        </div>
+        <div class="relative lg:col-span-1">
+            <input type="hidden" name="careers" id="careers-hidden" value="{{ filters.careers }}">
+            <div id="careers-container"
+                class="input-field flex flex-wrap gap-1 min-h-[44px] cursor-text"
+                onclick="document.getElementById('careers-tag-input').focus()">
+            </div>
+            <input type="text" id="careers-tag-input" placeholder="Filter by career..."
+                autocomplete="off"
+                class="mt-1 w-full border-0 outline-none text-sm text-[#374151] bg-transparent px-1" />
+            <ul id="careers-dropdown" class="absolute z-10 w-full bg-white border border-[#E5E7EB] rounded-2xl shadow-lg max-h-48 overflow-y-auto hidden"></ul>
         </div>
         <div class="lg:col-span-4 flex flex-wrap gap-3">
             <button type="submit" class="btn-primary">Search</button>
@@ -104,6 +138,7 @@
     {% endif %}
 </div>
 
+{{ careers_data|json_script:"student-offers-careers-data" }}
 <script>
 const LOCATIONS = {{ available_locations|safe }};
 const SKILLS_LIST = [
@@ -221,5 +256,70 @@ skillsInput.addEventListener('keydown', e => {
 });
 skillsInput.addEventListener('blur', () => setTimeout(hideSkillDropdown, 150));
 renderSkillTags();
+
+// Careers filter
+const CAREERS = JSON.parse(document.getElementById('student-offers-careers-data').textContent).map(c => c.name);
+
+const careersHidden   = document.getElementById('careers-hidden');
+const careersInput    = document.getElementById('careers-tag-input');
+const careersContainer = document.getElementById('careers-container');
+const careersDropdown  = document.getElementById('careers-dropdown');
+
+let careerTags = careersHidden.value ? careersHidden.value.split(',').map(c => c.trim()).filter(Boolean) : [];
+let careerHighlight = -1;
+
+function renderCareerTags() {
+    careersContainer.querySelectorAll('span').forEach(s => s.remove());
+    careerTags.forEach((tag, i) => {
+        const pill = document.createElement('span');
+        pill.className = 'flex items-center gap-1 bg-[#F3F4F6] text-[#374151] text-xs font-medium px-2 py-0.5 rounded-full';
+        pill.innerHTML = `${tag}<button type="button" onclick="removeCareerTag(${i})" class="ml-1 text-[#9CA3AF] hover:text-red-400 font-bold">✕</button>`;
+        careersContainer.insertBefore(pill, careersContainer.firstChild);
+    });
+    careersHidden.value = careerTags.join(',');
+}
+
+function addCareerTag(value) {
+    const career = value.trim();
+    if (!career) return;
+    const match = CAREERS.find(c => c.toLowerCase() === career.toLowerCase());
+    if (!match) { careersInput.classList.add('border-red-400'); setTimeout(() => careersInput.classList.remove('border-red-400'), 800); return; }
+    if (!careerTags.map(t => t.toLowerCase()).includes(match.toLowerCase())) {
+        careerTags.push(match);
+        renderCareerTags();
+    }
+    careersInput.value = '';
+    hideCareerDropdown();
+}
+
+function removeCareerTag(index) { careerTags.splice(index, 1); renderCareerTags(); }
+
+function showCareerDropdown(query) {
+    const filtered = CAREERS.filter(c => c.toLowerCase().includes(query.toLowerCase()) && !careerTags.map(t => t.toLowerCase()).includes(c.toLowerCase())).slice(0, 8);
+    if (!filtered.length || !query) { hideCareerDropdown(); return; }
+    careerHighlight = -1;
+    careersDropdown.innerHTML = '';
+    filtered.forEach(career => {
+        const li = document.createElement('li');
+        li.className = 'px-4 py-2 cursor-pointer hover:bg-[#F3F4F6] text-sm text-[#374151]';
+        li.textContent = career;
+        li.addEventListener('mousedown', e => { e.preventDefault(); addCareerTag(career); });
+        careersDropdown.appendChild(li);
+    });
+    careersDropdown.classList.remove('hidden');
+}
+
+function hideCareerDropdown() { careersDropdown.classList.add('hidden'); careerHighlight = -1; }
+
+careersInput.addEventListener('input', () => showCareerDropdown(careersInput.value));
+careersInput.addEventListener('keydown', e => {
+    const items = [...careersDropdown.querySelectorAll('li')];
+    if (e.key === 'ArrowDown') { e.preventDefault(); careerHighlight = Math.min(careerHighlight + 1, items.length - 1); items.forEach((li, i) => li.classList.toggle('bg-[#E5E7EB]', i === careerHighlight)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); careerHighlight = Math.max(careerHighlight - 1, 0); items.forEach((li, i) => li.classList.toggle('bg-[#E5E7EB]', i === careerHighlight)); }
+    else if (e.key === 'Enter') { e.preventDefault(); careerHighlight >= 0 && items[careerHighlight] ? addCareerTag(items[careerHighlight].textContent) : addCareerTag(careersInput.value); }
+    else if (e.key === 'Escape') { hideCareerDropdown(); }
+});
+careersInput.addEventListener('blur', () => setTimeout(hideCareerDropdown, 150));
+renderCareerTags();
 </script>
 {% endblock %}

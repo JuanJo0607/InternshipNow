@@ -24,7 +24,9 @@ def student_offers(request):
     salary   = request.GET.get('salary', '').strip()
     modality = request.GET.get('modality', '').strip()
     skills_param = request.GET.get('skills', '').strip()
+    careers_param = request.GET.get('careers', '').strip()
     skills_list = [s.strip() for s in skills_param.split(',') if s.strip()]
+    careers_list = [c.strip() for c in careers_param.split(',') if c.strip()]
 
     if location:
         offers = offers.filter(location__icontains=location)
@@ -34,15 +36,24 @@ def student_offers(request):
         offers = offers.filter(modality=modality)
     for skill in skills_list:
         offers = offers.filter(desired_skills__icontains=skill)
+    
+    # Filter by careers - show offers that include at least one of the selected careers
+    if careers_list:
+        from accounts.models import Career
+        career_objects = Career.objects.filter(name__in=careers_list)
+        if career_objects.exists():
+            offers = offers.filter(careers__in=career_objects).distinct()
 
     # FR-11 – calculate compatibility score
     try:
         profile = StudentProfile.objects.get(user=request.user)
         student_skills = profile.skills
+        student_careers = profile.careers.all()
     except StudentProfile.DoesNotExist:
         student_skills = ''
+        student_careers = None
 
-    ranked_offers = annotate_offers_with_score(offers, student_skills)
+    ranked_offers = annotate_offers_with_score(offers, student_skills, student_careers)
 
     # US-08 – IDs of already applied offers
     applied_ids = list(
@@ -56,17 +67,49 @@ def student_offers(request):
         .distinct()
     )
 
+    # Banner de perfil incompleto: calcular progreso y campos
+    from analytics.services import is_profile_complete
+    profile_status = is_profile_complete(request.user)
+    profile_missing = profile_status['missing_fields']
+    total_fields = 5
+    missing_count = len(profile_missing)
+    completed_count = total_fields - missing_count
+    profile_percent = round((completed_count / total_fields) * 100) if total_fields > 0 else 0
+
+    # Dynamic message for the banner
+    dynamic_message = ""
+    if profile_missing:
+        field_map = {
+            'National ID': 'Add your national ID',
+            'Career': 'Complete your career',
+            'Bio': 'Complete your Bio to gain 20% more visibility',
+            'Skills': 'Add your skills',
+            'CV': 'Upload your CV',
+        }
+        dynamic_message = field_map.get(profile_missing[0], 'Complete your profile to improve your opportunities')
+
+    from accounts.models import Career
+
+    careers_data = [{'id': c.id, 'name': c.name} for c in Career.objects.all().order_by('name')]
+
     return render(request, 'offers/student_offers.html', {
         'ranked_offers': ranked_offers,
         'student_skills': student_skills,
         'applied_ids': applied_ids,
         'available_locations': available_locations,
+        'careers_data': careers_data,
         'filters': {
             'location': location,
             'salary':   salary,
             'modality': modality,
             'skills':   skills_param,
+            'careers':  careers_param,
         },
+        'profile_missing': profile_missing,
+        'profile_percent': profile_percent,
+        'completed_count': completed_count,
+        'total_fields': total_fields,
+        'dynamic_message': dynamic_message,
     })
 
 
@@ -101,10 +144,20 @@ def create_offer(request):
             offer = form.save(commit=False)
             offer.company = profile
             offer.save()
+            form.save_m2m()  # Save careers M2M relationship
             return redirect('company_offers')
     else:
         form = InternshipOfferForm()
-    return render(request, 'offers/internship_form.html', {'form': form, 'action': 'Create'})
+    
+    from accounts.models import Career
+    careers_data = [{'id': c.id, 'name': c.name} for c in Career.objects.all()]
+    
+    return render(request, 'offers/internship_form.html', {
+        'form': form,
+        'action': 'Create',
+        'careers_data': careers_data,
+        'offer_careers_str': '',
+    })
 
 
 @login_required
@@ -113,14 +166,31 @@ def edit_offer(request, offer_id):
         return redirect('home')
     profile = CompanyProfile.objects.get(user=request.user)
     offer = InternshipOffer.objects.get(id=offer_id, company=profile)
+    offer_careers_str = ''  # Default to empty
+    
     if request.method == 'POST':
         form = InternshipOfferForm(request.POST, instance=offer)
         if form.is_valid():
-            form.save()
+            offer = form.save(commit=False)
+            offer.company = profile
+            offer.save()
+            form.save_m2m()  # Save careers M2M relationship
             return redirect('company_offers')
+        # POST with error: don't pass offer_careers_str to avoid autocomplete
     else:
         form = InternshipOfferForm(instance=offer)
-    return render(request, 'offers/internship_form.html', {'form': form, 'action': 'Edit'})
+        # GET: populate offer_careers_str from DB
+        offer_careers_str = ', '.join([career.name for career in offer.careers.all()])
+    
+    from accounts.models import Career
+    careers_data = [{'id': c.id, 'name': c.name} for c in Career.objects.all()]
+    
+    return render(request, 'offers/internship_form.html', {
+        'form': form,
+        'action': 'Edit',
+        'careers_data': careers_data,
+        'offer_careers_str': offer_careers_str,
+    })
 
 
 @login_required

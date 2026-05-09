@@ -1,5 +1,12 @@
-from django.contrib.auth.models import AbstractUser
+
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+class Career(models.Model):
+    name = models.CharField(max_length=128, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class User(AbstractUser):
@@ -14,7 +21,8 @@ class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     cedula = models.CharField(max_length=20, blank=True)
     university = models.CharField(max_length=255, default='Universidad EAFIT')
-    career = models.CharField(max_length=255)
+    # career = models.CharField(max_length=255, blank=True)  # Deprecated, kept for migration
+    careers = models.ManyToManyField('Career', blank=True, related_name='students')
     skills = models.TextField(blank=True)
     bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
