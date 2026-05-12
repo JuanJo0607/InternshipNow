@@ -27,9 +27,15 @@
                         <h2 class="mt-2 text-xl font-semibold text-[#111827]">
                             {{ item.app.student.user.get_full_name|default:item.app.student.user.username }}
                         </h2>
-                        <p class="mt-0.5 text-xs text-[#9CA3AF]">@{{ item.app.student.user.username }}{% if item.app.student.cedula %} · ID: {{ item.app.student.cedula }}{% endif %}</p>
-                        <p class="mt-1 text-sm text-[#6B7280]">{{ item.app.student.career }} · {{ item.app.student.university }}</p>
+                        <p class="mt-0.5 text-xs text-[#9CA3AF]">
+                            @{{ item.app.student.user.username }}
+                            {% if item.app.student.cedula %} · ID: {{ item.app.student.cedula }}{% endif %}
+                        </p>
+                        <p class="mt-1 text-sm text-[#6B7280]">
+                            {{ item.app.student.university }}
+                        </p>
                     </div>
+
                     <div class="flex flex-col items-end gap-2 shrink-0">
                         <span class="badge badge-soft {{ item.score_color }}">{{ item.score_label }}</span>
                         <span class="text-sm font-semibold text-[#111827]">{{ item.score }}%</span>
@@ -37,9 +43,54 @@
                         <p class="text-xs text-[#9CA3AF]">{{ item.app.applied_at|date:"Y-m-d H:i" }}</p>
                     </div>
                 </button>
-                {% if item.app.status == 'pending' %}
-                <div class="px-6 pb-5">
-                    <a href="{% url 'update_application_status' item.app.id %}" class="btn-secondary">Change status</a>
+
+                <div class="px-6 pb-5 flex flex-wrap gap-3">
+                    {% if item.app.status == 'pending' %}
+                        <a href="{% url 'update_application_status' item.app.id %}" class="btn-secondary">
+                            Change status
+                        </a>
+                    {% endif %}
+
+                    {% if item.app.status == 'accepted' or item.app.status == 'rejected' %}
+                        <button type="button"
+                                class="btn-secondary"
+                                onclick="toggleFeedback('feedback-{{ item.app.id }}')">
+                            {% if item.app.feedback %}
+                                Edit feedback
+                            {% else %}
+                                Add feedback
+                            {% endif %}
+                        </button>
+                    {% endif %}
+                </div>
+
+                {% if item.app.status == 'accepted' or item.app.status == 'rejected' %}
+                <div id="feedback-{{ item.app.id }}" class="hidden border-t border-[#E5E7EB] bg-white px-6 py-5">
+                    <form method="post" action="{% url 'update_application_feedback' item.app.id %}" class="space-y-4">
+                        {% csrf_token %}
+
+                        <div>
+                            <label for="feedback-{{ item.app.id }}-textarea" class="block text-sm font-semibold text-[#374151] mb-2">
+                                Feedback
+                            </label>
+                            <textarea id="feedback-{{ item.app.id }}-textarea"
+                                      name="feedback"
+                                      rows="4"
+                                      class="w-full rounded-xl border border-[#D1D5DB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#111827]"
+                                      placeholder="Write feedback for this candidate...">{% if item.app.feedback %}{{ item.app.feedback }}{% endif %}</textarea>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3">
+                            <button type="submit" class="btn-primary">
+                                Save feedback
+                            </button>
+                            <button type="button"
+                                    class="btn-secondary"
+                                    onclick="toggleFeedback('feedback-{{ item.app.id }}')">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
                 </div>
                 {% endif %}
 
@@ -55,6 +106,7 @@
                                 {% endfor %}
                             </div>
                         </div>
+
                         <div>
                             <p class="text-sm font-semibold text-[#374151] mb-2">Full profile</p>
                             <div class="flex flex-wrap gap-1">
@@ -65,6 +117,7 @@
                                 {% endfor %}
                             </div>
                         </div>
+
                         {% if item.app.student.cv_pdf %}
                         <div class="lg:col-span-2">
                             <a href="{{ item.app.student.cv_pdf.url }}" target="_blank" class="btn-secondary">View CV</a>
@@ -86,6 +139,11 @@
 function toggleRow(id) {
     const row = document.getElementById(id);
     if (row) row.classList.toggle('hidden');
+}
+
+function toggleFeedback(id) {
+    const feedbackBox = document.getElementById(id);
+    if (feedbackBox) feedbackBox.classList.toggle('hidden');
 }
 </script>
 {% endblock %}

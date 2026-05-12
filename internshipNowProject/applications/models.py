@@ -13,6 +13,7 @@ class InternshipApplication(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='applications')
     offer = models.ForeignKey(InternshipOffer, on_delete=models.CASCADE, related_name='applications')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    feedback = models.TextField(blank=True, null=True)
     applied_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -19,3 +19,19 @@ class ApplicationStatusForm(forms.ModelForm):
             else:
                 # disable field if already decided
                 self.fields['status'].disabled = True
+
+
+class ApplicationFeedbackForm(forms.ModelForm):
+    class Meta:
+        model = InternshipApplication
+        fields = ['feedback']
+        widgets = {
+            'feedback': forms.Textarea(attrs={
+                'class': 'w-full rounded-xl border border-[#D1D5DB] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#111827]',
+                'rows': 4,
+                'placeholder': 'Write feedback for this candidate...'
+            })
+        }
+        labels = {
+            'feedback': 'Feedback'
+        }
