@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from collections import Counter
 from django.utils import timezone
 from offers.models import InternshipOffer, InternshipOfferView
 from offers.forms import InternshipOfferForm
@@ -92,12 +94,17 @@ def student_offers(request):
 
     careers_data = [{'id': c.id, 'name': c.name} for c in Career.objects.all().order_by('name')]
 
+    default_career_id = None
+    if student_careers and student_careers.count() == 1:
+        default_career_id = student_careers.first().id
+
     return render(request, 'offers/student_offers.html', {
         'ranked_offers': ranked_offers,
         'student_skills': student_skills,
         'applied_ids': applied_ids,
         'available_locations': available_locations,
         'careers_data': careers_data,
+        'default_career_id': default_career_id,
         'filters': {
             'location': location,
             'salary':   salary,
@@ -234,3 +241,45 @@ def company_offers(request):
     profile = CompanyProfile.objects.get(user=request.user)
     offers = profile.offers.all().order_by('-created_at')
     return render(request, 'offers/company_offers.html', {'offers': offers, 'profile': profile})
+
+
+@login_required
+def demanded_skills_api(request):
+    if request.user.role != 'student':
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    active_offers = InternshipOffer.objects.filter(status='open')
+    if not active_offers.exists():
+        return JsonResponse({'status': 'no_data'})
+        
+    career_id = request.GET.get('career_id')
+    
+    def get_top_skills(offers_qs):
+        counter = Counter()
+        for offer in offers_qs:
+            skills_str = offer.desired_skills
+            if skills_str:
+                skills = [s.strip() for s in skills_str.split(',') if s.strip()]
+                counter.update(skills)
+        return counter
+
+    fallback = False
+    skills_counter = Counter()
+
+    if career_id:
+        filtered_offers = active_offers.filter(careers__id=career_id)
+        skills_counter = get_top_skills(filtered_offers)
+        
+        if not skills_counter:
+            skills_counter = get_top_skills(active_offers)
+            fallback = True
+    else:
+        skills_counter = get_top_skills(active_offers)
+        
+    top_skills = [{'name': skill, 'count': count} for skill, count in skills_counter.most_common(10)]
+    
+    return JsonResponse({
+        'status': 'success',
+        'skills': top_skills,
+        'fallback': fallback
+    })

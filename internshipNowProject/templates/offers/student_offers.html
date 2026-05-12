@@ -35,6 +35,10 @@
             <p class="mt-2 text-[#6B7280]">Filter vacancies according to your needs and find the right position.</p>
         </div>
         <div class="flex flex-wrap gap-3 items-center">
+            <button onclick="openDemandedSkillsModal()" class="btn-secondary flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Skills in demand
+            </button>
             <a href="{% url 'matching_offers' %}" class="btn-secondary">Best matches</a>
             <a href="{% url 'student_applications' %}" class="btn-secondary">My applications</a>
         </div>
@@ -138,6 +142,72 @@
     {% endif %}
 </div>
 
+<!-- Demanded Skills Modal -->
+<div id="demanded-skills-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity opacity-0 duration-200" id="ds-modal-backdrop" onclick="closeDemandedSkillsModal()"></div>
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <div id="ds-modal-panel" class="relative bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:max-w-lg w-full scale-95 opacity-0 duration-200">
+            <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Most Demanded Skills
+                </h3>
+                <button onclick="closeDemandedSkillsModal()" class="text-gray-400 hover:text-gray-500 transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="px-6 py-6">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter by career:</label>
+                    <select id="ds-career-select" class="input-field bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500 transition-all" onchange="fetchDemandedSkills()">
+                        <option value="">All careers</option>
+                        {% for c in careers_data %}
+                            <option value="{{ c.id }}" {% if c.id == default_career_id %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div id="ds-loading" class="hidden py-8 flex flex-col justify-center items-center gap-3">
+                    <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-sm text-gray-500 font-medium">Analyzing active offers...</span>
+                </div>
+                
+                <div id="ds-error" class="hidden py-8 text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-3">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <p class="text-gray-600 font-medium">Failed to load data. Please try again.</p>
+                </div>
+                
+                <div id="ds-no-data" class="hidden py-10 text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                    </div>
+                    <p class="text-gray-900 font-medium text-lg mb-1">No data available at the moment</p>
+                    <p class="text-gray-500 text-sm">There are no active offers to analyze right now.</p>
+                </div>
+                
+                <div id="ds-content" class="hidden">
+                    <div id="ds-fallback-msg" class="hidden mb-4 p-3 bg-amber-50 border border-amber-100 rounded-lg flex items-start gap-3">
+                        <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"></path></svg>
+                        <p class="text-sm text-amber-800">Not enough data for the selected career. Showing global ranking instead.</p>
+                    </div>
+                    
+                    <div id="ds-skills-list" class="flex flex-wrap gap-2.5">
+                        <!-- Skills will be injected here -->
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 text-right">
+                <button onclick="closeDemandedSkillsModal()" class="btn-primary w-full sm:w-auto">Got it</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{ careers_data|json_script:"student-offers-careers-data" }}
 <script>
 const LOCATIONS = {{ available_locations|safe }};
@@ -151,13 +221,15 @@ const SKILLS_LIST = [
   "Unit Testing","Selenium","Pytest","Postman","Cybersecurity","Networking"
 ];
 
+const removeAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 function buildAutocomplete({ inputId, dropdownId, list }) {
     const input = document.getElementById(inputId);
     const dropdown = document.getElementById(dropdownId);
     let highlightedIndex = -1;
 
     function showOptions(value) {
-        const filtered = list.filter(item => item.toLowerCase().includes(value.toLowerCase())).slice(0, 8);
+        const filtered = list.filter(item => removeAccents(item.toLowerCase()).includes(removeAccents(value.toLowerCase()))).slice(0, 20);
         if (!filtered.length || !value) { hideOptions(); return; }
         highlightedIndex = -1;
         dropdown.innerHTML = '';
@@ -217,9 +289,9 @@ function renderSkillTags() {
 function addSkillTag(value) {
     const skill = value.trim();
     if (!skill) return;
-    const match = SKILLS_LIST.find(s => s.toLowerCase() === skill.toLowerCase());
+    const match = SKILLS_LIST.find(s => removeAccents(s.toLowerCase()) === removeAccents(skill.toLowerCase()));
     if (!match) { skillsInput.classList.add('border-red-400'); setTimeout(() => skillsInput.classList.remove('border-red-400'), 800); return; }
-    if (!skillTags.map(t => t.toLowerCase()).includes(match.toLowerCase())) {
+    if (!skillTags.map(t => removeAccents(t.toLowerCase())).includes(removeAccents(match.toLowerCase()))) {
         skillTags.push(match);
         renderSkillTags();
     }
@@ -230,7 +302,7 @@ function addSkillTag(value) {
 function removeSkillTag(index) { skillTags.splice(index, 1); renderSkillTags(); }
 
 function showSkillDropdown(query) {
-    const filtered = SKILLS_LIST.filter(s => s.toLowerCase().includes(query.toLowerCase()) && !skillTags.map(t => t.toLowerCase()).includes(s.toLowerCase())).slice(0, 8);
+    const filtered = SKILLS_LIST.filter(s => removeAccents(s.toLowerCase()).includes(removeAccents(query.toLowerCase())) && !skillTags.map(t => removeAccents(t.toLowerCase())).includes(removeAccents(s.toLowerCase()))).slice(0, 20);
     if (!filtered.length || !query) { hideSkillDropdown(); return; }
     skillHighlight = -1;
     skillDropdown.innerHTML = '';
@@ -282,9 +354,9 @@ function renderCareerTags() {
 function addCareerTag(value) {
     const career = value.trim();
     if (!career) return;
-    const match = CAREERS.find(c => c.toLowerCase() === career.toLowerCase());
+    const match = CAREERS.find(c => removeAccents(c.toLowerCase()) === removeAccents(career.toLowerCase()));
     if (!match) { careersInput.classList.add('border-red-400'); setTimeout(() => careersInput.classList.remove('border-red-400'), 800); return; }
-    if (!careerTags.map(t => t.toLowerCase()).includes(match.toLowerCase())) {
+    if (!careerTags.map(t => removeAccents(t.toLowerCase())).includes(removeAccents(match.toLowerCase()))) {
         careerTags.push(match);
         renderCareerTags();
     }
@@ -295,7 +367,7 @@ function addCareerTag(value) {
 function removeCareerTag(index) { careerTags.splice(index, 1); renderCareerTags(); }
 
 function showCareerDropdown(query) {
-    const filtered = CAREERS.filter(c => c.toLowerCase().includes(query.toLowerCase()) && !careerTags.map(t => t.toLowerCase()).includes(c.toLowerCase())).slice(0, 8);
+    const filtered = CAREERS.filter(c => removeAccents(c.toLowerCase()).includes(removeAccents(query.toLowerCase())) && !careerTags.map(t => removeAccents(t.toLowerCase())).includes(removeAccents(c.toLowerCase()))).slice(0, 20);
     if (!filtered.length || !query) { hideCareerDropdown(); return; }
     careerHighlight = -1;
     careersDropdown.innerHTML = '';
@@ -321,5 +393,93 @@ careersInput.addEventListener('keydown', e => {
 });
 careersInput.addEventListener('blur', () => setTimeout(hideCareerDropdown, 150));
 renderCareerTags();
+
+// ── Modal de Skills en Demanda ─────────────────────────────────────
+const dsModal = document.getElementById('demanded-skills-modal');
+const dsModalBackdrop = document.getElementById('ds-modal-backdrop');
+const dsModalPanel = document.getElementById('ds-modal-panel');
+const dsCareerSelect = document.getElementById('ds-career-select');
+const dsLoading = document.getElementById('ds-loading');
+const dsError = document.getElementById('ds-error');
+const dsNoData = document.getElementById('ds-no-data');
+const dsContent = document.getElementById('ds-content');
+const dsFallbackMsg = document.getElementById('ds-fallback-msg');
+const dsSkillsList = document.getElementById('ds-skills-list');
+
+function openDemandedSkillsModal() {
+    dsModal.classList.remove('hidden');
+    setTimeout(() => {
+        dsModalBackdrop.classList.add('opacity-100');
+        dsModalBackdrop.classList.remove('opacity-0');
+        dsModalPanel.classList.add('scale-100', 'opacity-100');
+        dsModalPanel.classList.remove('scale-95', 'opacity-0');
+    }, 10);
+    fetchDemandedSkills();
+}
+
+function closeDemandedSkillsModal() {
+    dsModalBackdrop.classList.remove('opacity-100');
+    dsModalBackdrop.classList.add('opacity-0');
+    dsModalPanel.classList.remove('scale-100', 'opacity-100');
+    dsModalPanel.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => dsModal.classList.add('hidden'), 200);
+}
+
+async function fetchDemandedSkills() {
+    const careerId = dsCareerSelect.value;
+    
+    dsLoading.classList.remove('hidden');
+    dsError.classList.add('hidden');
+    dsNoData.classList.add('hidden');
+    dsContent.classList.add('hidden');
+    
+    try {
+        const url = new URL("{% url 'demanded_skills_api' %}", window.location.origin);
+        if (careerId) {
+            url.searchParams.append('career_id', careerId);
+        }
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const data = await response.json();
+        
+        dsLoading.classList.add('hidden');
+        
+        if (data.status === 'no_data' || (data.status === 'success' && data.skills.length === 0)) {
+            dsNoData.classList.remove('hidden');
+            return;
+        }
+        
+        if (data.status === 'success') {
+            dsContent.classList.remove('hidden');
+            
+            if (data.fallback) {
+                dsFallbackMsg.classList.remove('hidden');
+            } else {
+                dsFallbackMsg.classList.add('hidden');
+            }
+            
+            dsSkillsList.innerHTML = '';
+            data.skills.forEach((skill, index) => {
+                const pill = document.createElement('span');
+                const isTop = index === 0;
+                pill.className = `inline-flex items-center px-3.5 py-2 rounded-xl text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 shadow-sm border ${isTop ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent ring-2 ring-blue-600 ring-offset-2' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:shadow-md'}`;
+                
+                const numberSpan = document.createElement('span');
+                numberSpan.className = `flex items-center justify-center w-5 h-5 rounded-full text-xs mr-2 ${isTop ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`;
+                numberSpan.textContent = index + 1;
+                
+                pill.appendChild(numberSpan);
+                pill.appendChild(document.createTextNode(skill.name));
+                dsSkillsList.appendChild(pill);
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching demanded skills:', error);
+        dsLoading.classList.add('hidden');
+        dsError.classList.remove('hidden');
+    }
+}
 </script>
 {% endblock %}

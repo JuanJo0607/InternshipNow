@@ -126,6 +126,8 @@
 </div>
 
 <script>
+const removeAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 const STUDENT_SKILLS = [
   "Python","Java","JavaScript","TypeScript","C","C++","C#","Go","Rust","Swift","Kotlin","Ruby","PHP","Scala","R","MATLAB","Perl","Haskell","Dart","Lua","Shell Scripting","Bash","PowerShell",
   "HTML","CSS","React.js","Angular","Vue.js","Next.js","Nuxt.js","Svelte","jQuery","Bootstrap","Tailwind CSS","Sass","LESS","Webpack","Vite","Responsive Design","Web Accessibility","Progressive Web Apps",
@@ -157,9 +159,9 @@ function renderProfileSkillTags() {
 function addProfileSkill(value) {
     const skill = value.trim();
     if (!skill) return;
-    const match = STUDENT_SKILLS.find(s => s.toLowerCase() === skill.toLowerCase());
+    const match = STUDENT_SKILLS.find(s => removeAccents(s.toLowerCase()) === removeAccents(skill.toLowerCase()));
     if (!match) return;
-    if (!profileSkillsTags.map(s => s.toLowerCase()).includes(match.toLowerCase())) {
+    if (!profileSkillsTags.map(s => removeAccents(s.toLowerCase())).includes(removeAccents(match.toLowerCase()))) {
         profileSkillsTags.push(match);
         renderProfileSkillTags();
     }
@@ -173,7 +175,7 @@ function removeProfileSkill(index) {
 }
 
 function showProfileSkillsDropdown(query) {
-    const filtered = STUDENT_SKILLS.filter(s => s.toLowerCase().includes(query.toLowerCase()) && !profileSkillsTags.map(t => t.toLowerCase()).includes(s.toLowerCase())).slice(0, 8);
+    const filtered = STUDENT_SKILLS.filter(s => removeAccents(s.toLowerCase()).includes(removeAccents(query.toLowerCase())) && !profileSkillsTags.map(t => removeAccents(t.toLowerCase())).includes(removeAccents(s.toLowerCase()))).slice(0, 20);
     if (!filtered.length || !query) { hideProfileSkillsDropdown(); return; }
     profileSkillsHighlight = -1;
     profileSkillsDropdown.innerHTML = '';
@@ -248,9 +250,9 @@ function renderCareerTags() {
 function addCareer(value) {
     const career = value.trim();
     if (!career) return;
-    const match = CAREERS.find(c => c.toLowerCase() === career.toLowerCase());
+    const match = CAREERS.find(c => removeAccents(c.toLowerCase()) === removeAccents(career.toLowerCase()));
     if (!match) return;
-    if (!careersNames.map(c => c.toLowerCase()).includes(match.toLowerCase())) {
+    if (!careersNames.map(c => removeAccents(c.toLowerCase())).includes(removeAccents(match.toLowerCase()))) {
         careersNames.push(match);
         renderCareerTags();
     }
@@ -264,7 +266,7 @@ function removeCareer(index) {
 }
 
 function showCareerOptions(query) {
-    const filtered = CAREERS.filter(c => c.toLowerCase().includes(query.toLowerCase()) && !careersNames.map(t => t.toLowerCase()).includes(c.toLowerCase())).slice(0, 8);
+    const filtered = CAREERS.filter(c => removeAccents(c.toLowerCase()).includes(removeAccents(query.toLowerCase())) && !careersNames.map(t => removeAccents(t.toLowerCase())).includes(removeAccents(c.toLowerCase()))).slice(0, 20);
     if (!filtered.length || !query) { hideCareerOptions(); return; }
     careersHighlight = -1;
     careersDropdown.innerHTML = '';
@@ -302,7 +304,7 @@ careersContainer.addEventListener('click', () => careersInput.focus());
 renderCareerTags();
 
 function showUniversityOptions(value) {
-    const filtered = UNIVERSITIES.filter(u => u.toLowerCase().includes(value.toLowerCase())).slice(0, 8);
+    const filtered = UNIVERSITIES.filter(u => removeAccents(u.toLowerCase()).includes(removeAccents(value.toLowerCase()))).slice(0, 20);
     if (!filtered.length) { hideUniversityOptions(); return; }
     universityHighlight = -1;
     universityDropdown.innerHTML = '';

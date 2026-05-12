@@ -3,6 +3,7 @@ from offers import views
 
 urlpatterns = [
     path('student/offers/', views.student_offers, name='student_offers'),
+    path('student/offers/demanded-skills/', views.demanded_skills_api, name='demanded_skills_api'),
     path('student/offers/<int:offer_id>/', views.offer_detail, name='offer_detail'),
     path('company/offers/', views.company_offers, name='company_offers'),
     path('company/offers/new/', views.create_offer, name='create_offer'),

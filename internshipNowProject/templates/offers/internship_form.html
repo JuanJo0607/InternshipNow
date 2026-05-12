@@ -47,6 +47,8 @@
 
 {{ careers_data|json_script:"offer-careers-data" }}
 <script>
+const removeAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 const SKILLS_LIST = [
   "Python","Java","JavaScript","TypeScript","C","C++","C#","Go","Rust","Swift","Kotlin","Ruby","PHP","Scala","R","MATLAB","Perl","Haskell","Dart","Lua","Shell Scripting","Bash","PowerShell",
   "HTML","CSS","React.js","Angular","Vue.js","Next.js","Nuxt.js","Svelte","jQuery","Bootstrap","Tailwind CSS","Sass","LESS","Webpack","Vite","Responsive Design","Web Accessibility","Progressive Web Apps",
@@ -91,9 +93,9 @@ function renderSkillTags() {
 function addSkill(value) {
     const skill = value.trim();
     if (!skill) return;
-    const match = SKILLS_LIST.find(s => s.toLowerCase() === skill.toLowerCase());
+    const match = SKILLS_LIST.find(s => removeAccents(s.toLowerCase()) === removeAccents(skill.toLowerCase()));
     if (!match) return;
-    if (!skillsTags.map(s => s.toLowerCase()).includes(match.toLowerCase())) {
+    if (!skillsTags.map(s => removeAccents(s.toLowerCase())).includes(removeAccents(match.toLowerCase()))) {
         skillsTags.push(match);
         renderSkillTags();
     }
@@ -107,7 +109,7 @@ function removeSkill(index) {
 }
 
 function showSkillsDropdown(query) {
-    const filtered = SKILLS_LIST.filter(s => s.toLowerCase().includes(query.toLowerCase()) && !skillsTags.map(t => t.toLowerCase()).includes(s.toLowerCase())).slice(0, 8);
+    const filtered = SKILLS_LIST.filter(s => removeAccents(s.toLowerCase()).includes(removeAccents(query.toLowerCase())) && !skillsTags.map(t => removeAccents(t.toLowerCase())).includes(removeAccents(s.toLowerCase()))).slice(0, 20);
     if (!filtered.length || !query) { hideSkillsDropdown(); return; }
     skillsHighlighted = -1;
     skillsDropdown.innerHTML = '';
@@ -174,7 +176,7 @@ function addCareer(value) {
     const career = value.trim();
     if (!career) return;
     // Permitir cualquier texto, no solo los de CAREERS_LIST
-    if (!careersNames.map(c => c.toLowerCase()).includes(career.toLowerCase())) {
+    if (!careersNames.map(c => removeAccents(c.toLowerCase())).includes(removeAccents(career.toLowerCase()))) {
         careersNames.push(career);
         renderCareerTags();
     }
@@ -188,7 +190,7 @@ function removeCareer(index) {
 }
 
 function showCareersDropdown(query) {
-    const filtered = CAREERS_LIST.filter(c => c.toLowerCase().includes(query.toLowerCase()) && !careersNames.map(t => t.toLowerCase()).includes(c.toLowerCase())).slice(0, 8);
+    const filtered = CAREERS_LIST.filter(c => removeAccents(c.toLowerCase()).includes(removeAccents(query.toLowerCase())) && !careersNames.map(t => removeAccents(t.toLowerCase())).includes(removeAccents(c.toLowerCase()))).slice(0, 20);
     if (!filtered.length || !query) { hideCareersDropdown(); return; }
     careersHighlighted = -1;
     careersDropdown.innerHTML = '';
