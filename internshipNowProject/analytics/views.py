@@ -2,7 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from accounts.models import CompanyProfile
-from analytics.services import getViewsVsApplicationsPerJob, getAverageTimeToClose, getCandidatesByStatus, is_profile_complete
+from analytics.services import (
+    getViewsVsApplicationsPerJob, getAverageTimeToClose,
+    getCandidatesByStatus, is_profile_complete, get_demanded_skills,
+)
 
 
 @login_required
@@ -59,3 +62,19 @@ def company_metrics_api(request, id):
 def profile_status(request):
     status = is_profile_complete(request.user)
     return JsonResponse(status)
+
+
+@login_required
+def demanded_skills_api(request):
+    if request.user.role != 'student':
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    career_id = request.GET.get('career_id')
+    if career_id is not None:
+        try:
+            career_id = int(career_id)
+        except (ValueError, TypeError):
+            return JsonResponse({'error': 'Invalid career_id'}, status=400)
+
+    result = get_demanded_skills(career_id=career_id)
+    return JsonResponse(result)

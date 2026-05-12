@@ -1,3 +1,4 @@
+from collections import Counter
 from accounts.models import StudentProfile
 from applications.models import InternshipApplication
 from offers.models import InternshipOffer, InternshipOfferView
@@ -34,6 +35,46 @@ def is_profile_complete(user):
         'complete': len(missing) == 0,
         'missing_fields': missing
     }
+
+
+def get_demanded_skills(career_id=None):
+    """
+    Returns top 10 most demanded skills from active offers.
+    If career_id is given, filters by that career; falls back to global if no data.
+    Returns a dict: {'skills': [...], 'fallback': bool, 'status': 'success'|'no_data'}
+    """
+    active_offers = InternshipOffer.objects.filter(status='open')
+    if not active_offers.exists():
+        return {'status': 'no_data', 'skills': [], 'fallback': False}
+
+    def _count_skills(offers_qs):
+        counter = Counter()
+        for offer in offers_qs:
+            if offer.desired_skills:
+                counter.update(
+                    s.strip() for s in offer.desired_skills.split(',') if s.strip()
+                )
+        return counter
+
+    fallback = False
+    if career_id is not None:
+        from accounts.models import Career
+        try:
+            Career.objects.get(id=career_id)
+        except Career.DoesNotExist:
+            career_id = None
+
+    if career_id is not None:
+        filtered = active_offers.filter(careers__id=career_id)
+        counter = _count_skills(filtered)
+        if not counter:
+            counter = _count_skills(active_offers)
+            fallback = True
+    else:
+        counter = _count_skills(active_offers)
+
+    top_skills = [{'name': skill, 'count': count} for skill, count in counter.most_common(10)]
+    return {'status': 'success', 'skills': top_skills, 'fallback': fallback}
 
 
 def _apply_period_filter(queryset, date_field, filters):

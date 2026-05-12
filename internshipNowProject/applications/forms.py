@@ -35,3 +35,11 @@ class ApplicationFeedbackForm(forms.ModelForm):
         labels = {
             'feedback': 'Feedback'
         }
+
+    def clean_feedback(self):
+        feedback = (self.cleaned_data.get('feedback') or '').strip()
+        if not feedback:
+            raise forms.ValidationError('Feedback cannot be empty.')
+        if len(feedback) > 2000:
+            raise forms.ValidationError('Feedback cannot exceed 2000 characters.')
+        return feedback
