@@ -22,9 +22,10 @@ class CustomUserCreationForm(UserCreationForm):
 class StudentProfileForm(forms.ModelForm):
 
     first_name = forms.CharField(max_length=150, required=False, label='First name')
-    last_name = forms.CharField(max_length=150, required=False, label='Last name')
-    skills = forms.CharField(required=False, widget=forms.Textarea)
-    careers = forms.CharField(required=False, widget=forms.HiddenInput, label='Careers')
+    last_name  = forms.CharField(max_length=150, required=False, label='Last name')
+    cedula     = forms.CharField(max_length=20,  required=False, label='National ID')
+    skills     = forms.CharField(required=False, widget=forms.Textarea)
+    careers    = forms.CharField(required=False, widget=forms.HiddenInput, label='Careers')
 
     class Meta:
         model = StudentProfile
@@ -40,6 +41,12 @@ class StudentProfileForm(forms.ModelForm):
         self.fields['university'].widget.attrs['readonly'] = True
         if self.instance and self.instance.pk:
             self.fields['careers'].initial = ', '.join(self.instance.careers.values_list('name', flat=True))
+
+    def clean_cedula(self):
+        cedula = self.cleaned_data.get('cedula', '').strip()
+        if not cedula:
+            raise forms.ValidationError('National ID cannot be left empty.')
+        return cedula
 
     def clean_careers(self):
         from accounts.models import Career

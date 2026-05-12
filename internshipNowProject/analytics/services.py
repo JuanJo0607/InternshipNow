@@ -77,6 +77,38 @@ def get_demanded_skills(career_id=None):
     return {'status': 'success', 'skills': top_skills, 'fallback': fallback}
 
 
+def get_export_applications(company_profile, date_from=None, date_to=None, status=None):
+    """Returns applications queryset for a company, with optional filters."""
+    from applications.models import InternshipApplication
+    qs = InternshipApplication.objects.filter(
+        offer__company=company_profile
+    ).select_related('student__user', 'offer__company').prefetch_related('student__careers')
+
+    if date_from:
+        qs = qs.filter(applied_at__date__gte=date_from)
+    if date_to:
+        qs = qs.filter(applied_at__date__lte=date_to)
+    if status:
+        qs = qs.filter(status=status)
+
+    return qs.order_by('-applied_at')
+
+
+def get_export_offers(company_profile, date_from=None, date_to=None, status=None):
+    """Returns offers queryset for a company, with optional filters."""
+    from offers.models import InternshipOffer
+    qs = InternshipOffer.objects.filter(company=company_profile).select_related('company')
+
+    if date_from:
+        qs = qs.filter(created_at__date__gte=date_from)
+    if date_to:
+        qs = qs.filter(created_at__date__lte=date_to)
+    if status:
+        qs = qs.filter(status=status)
+
+    return qs.order_by('-created_at')
+
+
 def _apply_period_filter(queryset, date_field, filters):
     if not filters:
         return queryset

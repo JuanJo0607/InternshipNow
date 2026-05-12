@@ -44,7 +44,7 @@
                         <div class="flex flex-col gap-2">
                             <label class="form-label">{{ field.label }}</label>
                             <input type="text" name="{{ field.html_name }}" class="input-field"
-                                   value="{{ field.value|default:'' }}" required>
+                                   value="{{ field.value|default:'' }}">
                             {% if field.errors %}<p class="text-xs text-red-600">{{ field.errors.0 }}</p>{% endif %}
                         </div>
                     {% elif field.name == 'skills' %}
@@ -83,7 +83,11 @@
                         <div class="flex flex-col gap-2">
                             <label class="form-label">National ID</label>
                             {{ field }}
-                            <p class="text-sm text-[#6B7280]">Your national identity document number.</p>
+                            {% if field.errors %}
+                                <p class="text-xs text-red-600">{{ field.errors.0 }}</p>
+                            {% else %}
+                                <p class="text-sm text-[#6B7280]">Your national identity document number.</p>
+                            {% endif %}
                         </div>
                     {% else %}
                         <div class="flex flex-col gap-2">

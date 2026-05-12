@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Export Data{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-8">
+
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+            <p class="section-label">Export</p>
+            <h1 class="mt-3 text-3xl font-bold text-[#111827]">Data Export</h1>
+            <p class="mt-2 text-[#6B7280]">Download your applications and offers data in CSV or Excel format.</p>
+        </div>
+        <a href="{% url 'company_offers' %}" class="btn-secondary">Back to vacancies</a>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+
+        <!-- Export Applications -->
+        <section class="card p-8 flex flex-col gap-6">
+            <div>
+                <p class="section-label">Applications</p>
+                <h2 class="mt-2 text-xl font-semibold text-[#111827]">Export Applications</h2>
+                <p class="mt-1 text-sm text-[#6B7280]">Student name, ID, career, university, offer, date and status.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="form-label text-xs">From</label>
+                        <input type="date" id="app-date-from" class="input-field text-sm">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="form-label text-xs">To</label>
+                        <input type="date" id="app-date-to" class="input-field text-sm">
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="form-label text-xs">Status</label>
+                    <select id="app-status" class="input-field text-sm">
+                        <option value="">All statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="app-warning" class="hidden rounded-xl bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800">
+                No records found with the selected filters. Adjust your filters and try again.
+            </div>
+
+            <div class="flex gap-3 mt-auto">
+                <button onclick="triggerExport('applications', 'csv')"
+                        class="btn-secondary flex-1 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Export CSV
+                </button>
+                <button onclick="triggerExport('applications', 'xlsx')"
+                        class="btn-primary flex-1 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Export Excel
+                </button>
+            </div>
+        </section>
+
+        <!-- Export Offers -->
+        <section class="card p-8 flex flex-col gap-6">
+            <div>
+                <p class="section-label">Offers</p>
+                <h2 class="mt-2 text-xl font-semibold text-[#111827]">Export Offers</h2>
+                <p class="mt-1 text-sm text-[#6B7280]">Title, company, skills, modality, location, salary, date and status.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="form-label text-xs">From</label>
+                        <input type="date" id="offer-date-from" class="input-field text-sm">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="form-label text-xs">To</label>
+                        <input type="date" id="offer-date-to" class="input-field text-sm">
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="form-label text-xs">Status</label>
+                    <select id="offer-status" class="input-field text-sm">
+                        <option value="">All statuses</option>
+                        <option value="open">Open</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="offer-warning" class="hidden rounded-xl bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm text-yellow-800">
+                No records found with the selected filters. Adjust your filters and try again.
+            </div>
+
+            <div class="flex gap-3 mt-auto">
+                <button onclick="triggerExport('offers', 'csv')"
+                        class="btn-secondary flex-1 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Export CSV
+                </button>
+                <button onclick="triggerExport('offers', 'xlsx')"
+                        class="btn-primary flex-1 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Export Excel
+                </button>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script>
+async function triggerExport(type, format) {
+    const prefix  = type === 'applications' ? 'app' : 'offer';
+    const dateFrom = document.getElementById(`${prefix}-date-from`).value;
+    const dateTo   = document.getElementById(`${prefix}-date-to`).value;
+    const status   = document.getElementById(`${prefix}-status`).value;
+    const warning  = document.getElementById(`${prefix}-warning`);
+
+    warning.classList.add('hidden');
+
+    const params = new URLSearchParams({ type, format });
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo)   params.set('date_to', dateTo);
+    if (status)   params.set('status', status);
+
+    const checkRes = await fetch(`{% url 'export_check' %}?${params}`);
+    const { count } = await checkRes.json();
+
+    if (count === 0) {
+        warning.classList.remove('hidden');
+        return;
+    }
+
+    const exportUrl = type === 'applications'
+        ? `{% url 'export_applications' %}`
+        : `{% url 'export_offers' %}`;
+
+    params.delete('type');
+    window.location.href = `${exportUrl}?${params}`;
+}
+</script>
+{% endblock %}
